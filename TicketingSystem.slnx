@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/SolutionFolder/" />
+  <Folder Name="/SolutionFolder/Backend/">
+    <Project Path="TicketingSystem.Api/TicketingSystem.Api.csproj" Id="57970936-5600-41a1-9e6c-61bd8566ad0e" />
+    <Project Path="TicketingSystem.Application/TicketingSystem.Application.csproj" />
+    <Project Path="TicketingSystem.Domain/TicketingSystem.Domain.csproj" />
+    <Project Path="TicketingSystem.Infrastructure/TicketingSystem.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/SolutionFolder/Frontend/" />
+  <Folder Name="/SolutionFolder/Tests/">
+    <Project Path="TicketingSystem.IntegrationTests/TicketingSystem.IntegrationTests.csproj" />
+    <Project Path="TicketingSystem.UnitTests/TicketingSystem.UnitTests.csproj" />
+  </Folder>
+</Solution>
