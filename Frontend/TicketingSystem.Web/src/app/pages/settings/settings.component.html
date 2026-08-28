@@ -1,0 +1,432 @@
+<div class="settings-page">
+  <!--
+    ========================================================================
+    PAGE HEADER
+    ========================================================================
+  -->
+
+  <header class="page-header">
+    <div class="page-header-content">
+      <div class="eyebrow">ACCOUNT</div>
+
+      <h1>Settings</h1>
+
+      <p>Manage your account information and authentication settings.</p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      [disabled]="isLoading || isSaving"
+      (click)="loadCurrentUser()"
+    >
+      <span class="refresh-icon">↻</span>
+
+      <span>
+        {{ isLoading ? "Refreshing..." : "Refresh profile" }}
+      </span>
+    </button>
+  </header>
+
+  <!--
+    ========================================================================
+    SETTINGS GRID
+    ========================================================================
+  -->
+
+  <div class="settings-grid">
+    <!--
+      ======================================================================
+      PROFILE CARD
+      ======================================================================
+    -->
+
+    <section class="settings-card profile-card">
+      <!-- Card header -->
+      <div class="card-header">
+        <div>
+          <span class="card-eyebrow">PROFILE</span>
+
+          <h2>Personal information</h2>
+
+          <p>Update the personal information associated with your account.</p>
+        </div>
+
+        <div class="profile-status">
+          <span class="status-dot" [class.loading]="isLoading"></span>
+
+          <span>
+            {{ isLoading ? "Refreshing" : "Up to date" }}
+          </span>
+        </div>
+      </div>
+
+      <!--
+        ====================================================================
+        PROFILE SUMMARY
+        ====================================================================
+      -->
+
+      <div class="profile-summary">
+        <div class="profile-avatar">
+          {{ userInitial }}
+        </div>
+
+        <div class="profile-summary-details">
+          <h3>{{ userDisplayName }}</h3>
+
+          <p>
+            {{ currentUser?.email || "No email available" }}
+          </p>
+
+          <span class="role-badge">
+            {{ userRole }}
+          </span>
+        </div>
+      </div>
+
+      <!--
+        ====================================================================
+        EDIT MODE
+        ====================================================================
+      -->
+
+      <form
+        *ngIf="isEditing"
+        class="profile-edit-form"
+        [formGroup]="profileForm"
+        (ngSubmit)="saveProfile()"
+        novalidate
+      >
+        <div class="edit-form-header">
+          <div>
+            <h3>Edit profile</h3>
+
+            <p>Update your name and email address below.</p>
+          </div>
+        </div>
+
+        <!-- Form fields -->
+        <div class="form-grid">
+          <!-- First name -->
+          <div class="form-group">
+            <label for="firstName"> First name </label>
+
+            <input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              autocomplete="given-name"
+              placeholder="Enter first name"
+              [class.invalid]="isFieldInvalid('firstName')"
+            />
+
+            <span
+              *ngIf="isFieldInvalid('firstName')"
+              class="validation-message"
+            >
+              {{ getValidationMessage("firstName") }}
+            </span>
+          </div>
+
+          <!-- Last name -->
+          <div class="form-group">
+            <label for="lastName"> Last name </label>
+
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              autocomplete="family-name"
+              placeholder="Enter last name"
+              [class.invalid]="isFieldInvalid('lastName')"
+            />
+
+            <span *ngIf="isFieldInvalid('lastName')" class="validation-message">
+              {{ getValidationMessage("lastName") }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email"> Email address </label>
+
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="Enter email address"
+            [class.invalid]="isFieldInvalid('email')"
+          />
+
+          <span *ngIf="isFieldInvalid('email')" class="validation-message">
+            {{ getValidationMessage("email") }}
+          </span>
+        </div>
+
+        <!-- Form actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="cancel-button"
+            [disabled]="isSaving"
+            (click)="cancelEditing()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="save-profile-button"
+            [disabled]="isSaving"
+          >
+            <span class="button-icon"> ✓ </span>
+
+            <span>
+              {{ isSaving ? "Saving..." : "Save changes" }}
+            </span>
+          </button>
+        </div>
+      </form>
+
+      <!--
+        ====================================================================
+        READ-ONLY MODE
+        ====================================================================
+      -->
+
+      <ng-container *ngIf="!isEditing">
+        <div class="information-grid">
+          <!-- First name -->
+          <div class="information-item">
+            <span class="information-label"> First name </span>
+
+            <span class="information-value">
+              {{ currentUser?.firstName || "—" }}
+            </span>
+          </div>
+
+          <!-- Last name -->
+          <div class="information-item">
+            <span class="information-label"> Last name </span>
+
+            <span class="information-value">
+              {{ currentUser?.lastName || "—" }}
+            </span>
+          </div>
+
+          <!-- Email -->
+          <div class="information-item">
+            <span class="information-label"> Email address </span>
+
+            <span class="information-value">
+              {{ currentUser?.email || "—" }}
+            </span>
+          </div>
+
+          <!-- Role -->
+          <div class="information-item">
+            <span class="information-label"> Application role </span>
+
+            <span class="information-value">
+              {{ userRole }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Profile action -->
+        <div class="profile-actions">
+          <button
+            type="button"
+            class="edit-profile-button"
+            [disabled]="isLoading"
+            (click)="startEditing()"
+          >
+            <span class="button-icon"> ✎ </span>
+
+            <span> Edit profile </span>
+          </button>
+        </div>
+      </ng-container>
+    </section>
+
+    <!--
+      ======================================================================
+      ACCOUNT CARD
+      ======================================================================
+    -->
+
+    <section class="settings-card account-card">
+      <div class="card-header">
+        <div>
+          <span class="card-eyebrow">ACCOUNT</span>
+
+          <h2>Account information</h2>
+
+          <p>Details about your Ticketing System account.</p>
+        </div>
+      </div>
+
+      <div class="account-list">
+        <!-- User ID -->
+        <div class="account-row">
+          <div class="account-row-icon">#</div>
+
+          <div class="account-row-content">
+            <span class="account-row-label"> User ID </span>
+
+            <span class="account-row-value account-id">
+              {{ currentUser?.userId || "—" }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="account-row">
+          <div class="account-row-icon">&#64;</div>
+
+          <div class="account-row-content">
+            <span class="account-row-label"> Email </span>
+
+            <span class="account-row-value">
+              {{ currentUser?.email || "—" }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Role -->
+        <div class="account-row">
+          <div class="account-row-icon">◇</div>
+
+          <div class="account-row-content">
+            <span class="account-row-label"> Role </span>
+
+            <span class="account-row-value">
+              {{ userRole }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Authentication -->
+        <div class="account-row">
+          <div class="account-row-icon">✓</div>
+
+          <div class="account-row-content">
+            <span class="account-row-label"> Authentication </span>
+
+            <span class="account-row-value authentication-value">
+              <span class="authentication-dot"></span>
+
+              Authenticated
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!--
+      ======================================================================
+      SECURITY CARD
+      ======================================================================
+    -->
+
+    <section class="settings-card security-card">
+      <div class="card-header">
+        <div>
+          <span class="card-eyebrow">SECURITY</span>
+
+          <h2>Authentication &amp; session</h2>
+
+          <p>Manage your current application session.</p>
+        </div>
+      </div>
+
+      <div class="security-content">
+        <div class="security-status">
+          <div class="security-status-icon">✓</div>
+
+          <div>
+            <strong> Session active </strong>
+
+            <p>
+              You are currently authenticated with the Ticketing System API.
+            </p>
+          </div>
+        </div>
+
+        <div class="security-divider"></div>
+
+        <div class="security-information">
+          <div>
+            <span class="information-label"> Authentication method </span>
+
+            <span class="information-value"> JWT Bearer </span>
+          </div>
+
+          <div>
+            <span class="information-label"> Session state </span>
+
+            <span class="information-value"> Active </span>
+          </div>
+        </div>
+
+        <button type="button" class="logout-button" (click)="logout()">
+          <span> ↪ </span>
+
+          <span> Sign out of this account </span>
+        </button>
+      </div>
+    </section>
+
+    <!--
+      ======================================================================
+      PREFERENCES CARD
+      ======================================================================
+    -->
+
+    <section class="settings-card preferences-card">
+      <div class="card-header">
+        <div>
+          <span class="card-eyebrow">APPLICATION</span>
+
+          <h2>Preferences</h2>
+
+          <p>
+            Application preferences will be available here as the Ticketing
+            System grows.
+          </p>
+        </div>
+      </div>
+
+      <div class="preference-list">
+        <!-- Appearance -->
+        <div class="preference-item">
+          <div class="preference-icon">◐</div>
+
+          <div class="preference-content">
+            <strong> Appearance </strong>
+
+            <span> Light application theme </span>
+          </div>
+
+          <span class="preference-state"> Default </span>
+        </div>
+
+        <!-- Notifications -->
+        <div class="preference-item">
+          <div class="preference-icon">♢</div>
+
+          <div class="preference-content">
+            <strong> Notifications </strong>
+
+            <span> Notification preferences will be configurable here. </span>
+          </div>
+
+          <span class="preference-state disabled"> Coming soon </span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

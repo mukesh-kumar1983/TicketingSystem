@@ -1,9 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
+
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+
 using TicketingSystem.Application.DTOs.Authentication;
 using TicketingSystem.Application.Interfaces;
 
@@ -12,28 +13,27 @@ namespace TicketingSystem.Infrastructure.Authentication;
 /// <summary>
 /// Generates JWT access tokens for authenticated users.
 ///
-/// This service is responsible only for creating JWT access tokens.
-/// It does not authenticate users or validate incoming tokens.
-/// User authentication is handled by the Application and Identity services,
-/// while incoming JWT validation is configured in the Infrastructure
+/// This service is responsible only for creating signed JWT access tokens.
+/// Incoming JWT validation is handled separately by ASP.NET Core JWT Bearer
+/// authentication configured by the Infrastructure layer.
+///
+/// The same JWT secret, issuer, audience, signing algorithm, and key identifier
+/// used here must correspond to the values configured by the JWT Bearer
 /// authentication configuration.
 /// </summary>
 public sealed class JwtTokenService : IJwtTokenService
 {
     /// <summary>
-    /// Identifies the symmetric signing key used by TicketingSystem JWT tokens.
+    /// Identifies the symmetric signing key used by the TicketingSystem JWT
+    /// authentication system.
     ///
-    /// This value must match the KeyId configured in
-    /// <see cref="TicketingSystem.Infrastructure.DependencyInjection.InfrastructureServiceExtensions"/>.
-    ///
-    /// The key identifier becomes the JWT "kid" header. Microsoft IdentityModel
-    /// uses this identifier to determine which signing key should be used when
-    /// validating the token.
+    /// This value is written to the JWT "kid" header and is also configured
+    /// on the validation key used by JWT Bearer authentication.
     /// </summary>
-    private const string JwtSigningKeyId = "TicketingSystemJwtKey";
+    public const string SigningKeyId = "TicketingSystemJwtKey";
 
     /// <summary>
-    /// Contains the configured JWT settings.
+    /// Contains the application's configured JWT settings.
     /// </summary>
     private readonly JwtOptions _jwtOptions;
 
@@ -42,10 +42,10 @@ public sealed class JwtTokenService : IJwtTokenService
     /// <see cref="JwtTokenService"/> class.
     /// </summary>
     /// <param name="options">
-    /// The configured JWT options.
+    /// The application's configured JWT options.
     /// </param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when the JWT options are not provided.
+    /// Thrown when <paramref name="options"/> is null.
     /// </exception>
     public JwtTokenService(
         IOptions<JwtOptions> options)
@@ -66,8 +66,8 @@ public sealed class JwtTokenService : IJwtTokenService
         // ---------------------------------------------------------------------
         // Calculate the token expiration time.
         //
-        // JWT expiration is calculated using UTC to avoid problems caused by
-        // different server time zones.
+        // UTC is deliberately used so that token expiration is independent
+        // of the server's local time zone.
         // ---------------------------------------------------------------------
 
         var expiresAt =
@@ -75,22 +75,18 @@ public sealed class JwtTokenService : IJwtTokenService
                 _jwtOptions.ExpirationMinutes);
 
         // ---------------------------------------------------------------------
-        // Create the JWT claims.
+        // Create the claims contained within the JWT.
         //
-        // Claims represent information about the authenticated user.
+        // These claims represent the authenticated user's identity and role.
         //
-        // The role claim is particularly important because ASP.NET Core
-        // authorization can use it for role-based authorization such as:
-        //
-        // [Authorize(Roles = "Admin")]
-        //
-        // The user identity claims are also used by endpoints such as
-        // GET /api/Auth/me.
+        // We include both JWT registered claims and ASP.NET Core Identity-style
+        // claims where appropriate because ASP.NET Core authorization and
+        // ControllerBase.User commonly work with ClaimTypes values.
         // ---------------------------------------------------------------------
 
         var claims = new List<Claim>
         {
-            // Standard JWT subject claim containing the user's identifier.
+            // Standard JWT subject claim.
             new(
                 JwtRegisteredClaimNames.Sub,
                 userId),
@@ -100,7 +96,7 @@ public sealed class JwtTokenService : IJwtTokenService
                 JwtRegisteredClaimNames.Email,
                 email),
 
-            // ASP.NET Core identity identifier claim.
+            // ASP.NET Core user identifier claim.
             new(
                 ClaimTypes.NameIdentifier,
                 userId),
@@ -110,31 +106,35 @@ public sealed class JwtTokenService : IJwtTokenService
                 ClaimTypes.Email,
                 email),
 
-            // User's first name.
+            // ASP.NET Core first-name claim.
             new(
                 ClaimTypes.GivenName,
                 firstName),
 
-            // User's last name.
+            // ASP.NET Core surname claim.
             new(
                 ClaimTypes.Surname,
                 lastName),
 
-            // Full display name used by ASP.NET Core's User.Identity.Name.
+            // ASP.NET Core display-name claim.
             new(
                 ClaimTypes.Name,
                 $"{firstName} {lastName}".Trim()),
 
-            // User's application role.
+            // ASP.NET Core role claim.
+            //
+            // This is particularly important because [Authorize(Roles = "...")]
+            // uses the configured role claim to perform role-based authorization.
             new(
                 ClaimTypes.Role,
                 role)
         };
 
         // ---------------------------------------------------------------------
-        // Convert the configured secret into bytes.
+        // Convert the configured JWT secret into bytes.
         //
-        // The same secret must be used by the JWT validation configuration.
+        // The same secret is used by InfrastructureServiceExtensions when
+        // configuring JWT Bearer validation.
         // ---------------------------------------------------------------------
 
         var secretKeyBytes =
@@ -142,75 +142,40 @@ public sealed class JwtTokenService : IJwtTokenService
                 _jwtOptions.SecretKey);
 
         // ---------------------------------------------------------------------
-        // Create the symmetric signing key.
+        // Create the symmetric security key.
         //
-        // The explicit KeyId is important for newer versions of
-        // Microsoft.IdentityModel.
+        // The KeyId becomes the "kid" value in the JWT header.
         //
-        // It causes the generated JWT to contain:
-        //
-        // "kid": "TicketingSystemJwtKey"
-        //
-        // The validation side uses the exact same KeyId.
+        // JwtTokenService.SigningKeyId must match the KeyId configured on the
+        // validation key in InfrastructureServiceExtensions.
         // ---------------------------------------------------------------------
 
         var signingKey =
             new SymmetricSecurityKey(
                 secretKeyBytes)
             {
-                KeyId = JwtSigningKeyId
+                KeyId = SigningKeyId
             };
 
         // ---------------------------------------------------------------------
-        // TEMPORARY DIAGNOSTIC INFORMATION
-        // ---------------------------------------------------------------------
+        // Create the signing credentials.
         //
-        // We deliberately do NOT print the JWT secret.
+        // HmacSha256 creates an HS256-signed JWT.
         //
-        // Instead, we calculate a SHA-256 fingerprint of the secret.
-        // This allows us to compare the signing key with the validation key
-        // without exposing the actual secret.
-        //
-        // These diagnostics can be removed after JWT authentication has been
-        // completely verified.
+        // The same secret key must therefore be available to the JWT Bearer
+        // validation configuration so that the signature can be verified.
         // ---------------------------------------------------------------------
 
-        var keyFingerprint =
-            Convert.ToHexString(
-                SHA256.HashData(
-                    secretKeyBytes));
-
-        Console.WriteLine(
-            $"JWT Signing Key Fingerprint: " +
-            $"{keyFingerprint}");
-
-        Console.WriteLine(
-            $"JWT Signing Key Length: " +
-            $"{secretKeyBytes.Length} bytes");
-
-        Console.WriteLine(
-            $"JWT Signing Key ID: " +
-            $"{JwtSigningKeyId}");
-
-        // ---------------------------------------------------------------------
-        // Create signing credentials.
-        //
-        // HMAC SHA-256 is used to digitally sign the JWT.
-        //
-        // The receiving API will use the same symmetric secret to verify
-        // that the token has not been modified.
-        // ---------------------------------------------------------------------
-
-        var credentials =
+        var signingCredentials =
             new SigningCredentials(
                 signingKey,
                 SecurityAlgorithms.HmacSha256);
 
         // ---------------------------------------------------------------------
-        // Create the JWT security token.
+        // Create the JWT.
         //
-        // The issuer, audience, claims, expiration, and signing credentials
-        // are all included in the token.
+        // Issuer and audience are embedded into the token and are later
+        // validated by ASP.NET Core JWT Bearer authentication.
         // ---------------------------------------------------------------------
 
         var token =
@@ -219,15 +184,17 @@ public sealed class JwtTokenService : IJwtTokenService
                 audience: _jwtOptions.Audience,
                 claims: claims,
                 expires: expiresAt,
-                signingCredentials: credentials);
+                signingCredentials: signingCredentials);
 
         // ---------------------------------------------------------------------
         // Serialize the JWT into its compact string representation.
         //
-        // This is the value that will be returned to the client and subsequently
-        // sent in the HTTP Authorization header:
+        // The resulting value has the following logical structure:
         //
-        // Authorization: Bearer <access-token>
+        //     Header.Payload.Signature
+        //
+        // The signature is generated from the header and payload using the
+        // configured HS256 signing key.
         // ---------------------------------------------------------------------
 
         var accessToken =
@@ -237,8 +204,8 @@ public sealed class JwtTokenService : IJwtTokenService
         // ---------------------------------------------------------------------
         // Return the authentication response.
         //
-        // The response contains both the JWT and useful information about
-        // the authenticated user.
+        // The access token is returned together with the user information
+        // needed by the client application.
         // ---------------------------------------------------------------------
 
         return new LoginResponse

@@ -1,0 +1,623 @@
+<div class="ticket-detail-page">
+  <!-- ============================================================= -->
+  <!-- PAGE HEADER -->
+  <!-- ============================================================= -->
+
+  <header class="page-header">
+    <div class="page-header-left">
+      <button type="button" class="back-button" (click)="goBack()">
+        ← Back to Tickets
+      </button>
+
+      <div class="page-title">
+        <div class="eyebrow">TICKET DETAILS</div>
+
+        <h1 *ngIf="ticket">#{{ ticket.id }} — {{ ticket.title }}</h1>
+
+        <p *ngIf="ticket">
+          Complete ticket information, assignment, workflow activity and
+          communication.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================= -->
+  <!-- LOADING -->
+  <!-- ============================================================= -->
+
+  <div *ngIf="isLoading" class="state-card">
+    <div class="loading-spinner"></div>
+
+    <strong>Loading ticket...</strong>
+
+    <span>Please wait while the ticket details are retrieved.</span>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- ERROR -->
+  <!-- ============================================================= -->
+
+  <div *ngIf="!isLoading && errorMessage" class="state-card error-state">
+    <div class="state-icon">!</div>
+
+    <strong>Unable to load ticket</strong>
+
+    <span>{{ errorMessage }}</span>
+
+    <button type="button" class="secondary-button" (click)="loadTicket()">
+      Try Again
+    </button>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- TICKET CONTENT -->
+  <!-- ============================================================= -->
+
+  <main *ngIf="!isLoading && ticket" class="ticket-layout">
+    <!-- =========================================================== -->
+    <!-- MAIN COLUMN -->
+    <!-- =========================================================== -->
+
+    <div class="ticket-main-column">
+      <!-- ========================================================= -->
+      <!-- TICKET SUMMARY -->
+      <!-- ========================================================= -->
+
+      <section class="detail-card">
+        <div class="card-header">
+          <div>
+            <div class="section-eyebrow">OVERVIEW</div>
+
+            <h2>Ticket Information</h2>
+          </div>
+
+          <span class="status-badge" [ngClass]="getStatusClass(ticket.status)">
+            {{ getStatusLabel(ticket.status) }}
+          </span>
+        </div>
+
+        <div class="ticket-summary">
+          <div class="summary-title">
+            <h3>{{ ticket.title }}</h3>
+
+            <p>
+              {{ ticket.description || "No description provided." }}
+            </p>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span>Ticket ID</span>
+
+              <strong>#{{ ticket.id }}</strong>
+            </div>
+
+            <div class="summary-item">
+              <span>Priority</span>
+
+              <strong
+                class="priority-value"
+                [ngClass]="getPriorityClass(ticket.priority)"
+              >
+                {{ getPriorityLabel(ticket.priority) }}
+              </strong>
+            </div>
+
+            <div class="summary-item">
+              <span>Customer</span>
+
+              <strong>{{ ticket.customerName || "—" }}</strong>
+            </div>
+
+            <div class="summary-item">
+              <span>Created</span>
+
+              <strong>{{ formatDate(ticket.createdAt) }}</strong>
+            </div>
+
+            <div class="summary-item">
+              <span>Last Updated</span>
+
+              <strong>{{ formatDate(ticket.updatedAt) }}</strong>
+            </div>
+
+            <div class="summary-item">
+              <span>Total Work Time</span>
+
+              <strong>{{ formatWorkTime(ticket.totalWorkTime) }}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- COMMENTS -->
+      <!-- ========================================================= -->
+
+      <section class="detail-card">
+        <div class="card-header">
+          <div>
+            <div class="section-eyebrow">COMMUNICATION</div>
+
+            <h2>Comments</h2>
+          </div>
+
+          <span class="section-count">
+            {{ comments.length }}
+          </span>
+        </div>
+
+        <div class="comment-composer">
+          <div class="comment-composer-header">
+            <div>
+              <strong>Add a comment</strong>
+
+              <span>
+                Share an update, finding, or additional information about this
+                ticket.
+              </span>
+            </div>
+          </div>
+
+          <textarea
+            id="ticket-comment"
+            [(ngModel)]="newComment"
+            [disabled]="isAddingComment"
+            maxlength="4000"
+            rows="4"
+            placeholder="Write a comment..."
+            aria-label="Ticket comment"
+          ></textarea>
+
+          <div class="comment-composer-footer">
+            <span class="comment-character-count">
+              {{ newComment.length }}/4000
+            </span>
+
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="isAddingComment || !newComment.trim()"
+              (click)="addComment()"
+            >
+              {{ isAddingComment ? "Adding Comment..." : "Add Comment" }}
+            </button>
+          </div>
+
+          <div
+            *ngIf="commentMessage"
+            class="operation-message"
+            [ngClass]="{
+              'operation-success': commentMessage.includes('successfully'),
+              'operation-error': !commentMessage.includes('successfully'),
+            }"
+          >
+            {{ commentMessage }}
+          </div>
+        </div>
+
+        <div *ngIf="comments.length === 0" class="empty-section">
+          <div class="empty-icon">💬</div>
+
+          <strong>No comments yet</strong>
+
+          <span>
+            Add the first comment to start the conversation about this ticket.
+          </span>
+        </div>
+
+        <div *ngIf="comments.length > 0" class="comments-list">
+          <article *ngFor="let comment of comments" class="comment">
+            <div class="comment-content">
+              <div class="comment-header">
+                <strong>
+                  {{ comment.userName || "System" }}
+                </strong>
+
+                <span>
+                  {{ formatDate(comment.createdAt) }}
+                </span>
+              </div>
+
+              <p>
+                {{ comment.content || comment.text || "No comment content." }}
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- ACTIVITY LOG -->
+      <!-- ========================================================= -->
+
+      <section class="detail-card">
+        <div class="card-header">
+          <div>
+            <div class="section-eyebrow">HISTORY</div>
+
+            <h2>Activity Log</h2>
+          </div>
+
+          <span class="section-count">
+            {{ activities.length }}
+          </span>
+        </div>
+
+        <div *ngIf="activities.length === 0" class="empty-section">
+          <div class="empty-icon">◷</div>
+
+          <strong>No activity recorded</strong>
+
+          <span> Ticket activity will appear here as the ticket changes. </span>
+        </div>
+
+        <div *ngIf="activities.length > 0" class="activity-list">
+          <article *ngFor="let activity of activities" class="activity-item">
+            <div class="activity-marker"></div>
+
+            <div class="activity-content">
+              <div class="activity-header">
+                <strong>
+                  {{ activity.userName || "System" }}
+                </strong>
+
+                <span>
+                  {{ formatDate(activity.createdAt) }}
+                </span>
+              </div>
+
+              <p>
+                {{
+                  activity.description ||
+                    activity.message ||
+                    "Ticket activity recorded."
+                }}
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- TIME ENTRIES -->
+      <!-- ========================================================= -->
+
+      <section class="detail-card">
+        <div class="card-header">
+          <div>
+            <div class="section-eyebrow">WORK LOG</div>
+
+            <h2>Time Entries</h2>
+          </div>
+
+          <span class="section-count">
+            {{ timeEntries.length }}
+          </span>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- LOG TIME COMPOSER -->
+        <!-- ======================================================= -->
+
+        <div class="time-entry-composer">
+          <div class="time-entry-composer-header">
+            <div>
+              <strong>Log time</strong>
+
+              <span> Record the work you performed on this ticket. </span>
+            </div>
+          </div>
+
+          <div class="time-entry-form-grid">
+            <!-- =================================================== -->
+            <!-- WORK DATE -->
+            <!-- =================================================== -->
+
+            <div class="time-entry-field">
+              <label for="time-entry-work-date">
+                Work Date
+                <span class="required">*</span>
+              </label>
+
+              <input
+                id="time-entry-work-date"
+                type="date"
+                [(ngModel)]="timeEntryWorkDate"
+                [disabled]="isAddingTimeEntry"
+                aria-label="Work date"
+              />
+            </div>
+
+            <!-- =================================================== -->
+            <!-- DURATION -->
+            <!-- =================================================== -->
+
+            <div class="time-entry-field">
+              <label for="time-entry-duration">
+                Duration
+                <span class="required">*</span>
+              </label>
+
+              <input
+                id="time-entry-duration"
+                type="text"
+                [(ngModel)]="timeEntryDuration"
+                [disabled]="isAddingTimeEntry"
+                maxlength="5"
+                placeholder="01:30"
+                inputmode="numeric"
+                aria-label="Work duration"
+              />
+
+              <span class="field-help">
+                Use HH:mm, for example 01:30 for 1 hour 30 minutes.
+              </span>
+            </div>
+          </div>
+
+          <!-- ===================================================== -->
+          <!-- DESCRIPTION -->
+          <!-- ===================================================== -->
+
+          <div class="time-entry-field description-field">
+            <label for="time-entry-description">
+              Work Description
+              <span class="required">*</span>
+            </label>
+
+            <textarea
+              id="time-entry-description"
+              [(ngModel)]="timeEntryDescription"
+              [disabled]="isAddingTimeEntry"
+              maxlength="2000"
+              rows="4"
+              placeholder="Describe the work performed..."
+              aria-label="Work description"
+            ></textarea>
+
+            <div class="time-entry-description-footer">
+              <span class="field-help">
+                Describe what was investigated, changed, tested, or completed.
+              </span>
+
+              <span class="time-entry-character-count">
+                {{ timeEntryDescription.length }}/2000
+              </span>
+            </div>
+          </div>
+
+          <!-- ===================================================== -->
+          <!-- ACTION -->
+          <!-- ===================================================== -->
+
+          <div class="time-entry-composer-footer">
+            <span class="time-entry-limit"> Maximum duration: 24 hours. </span>
+
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="
+                isAddingTimeEntry ||
+                !timeEntryWorkDate ||
+                !timeEntryDuration.trim() ||
+                !timeEntryDescription.trim()
+              "
+              (click)="addTimeEntry()"
+            >
+              {{ isAddingTimeEntry ? "Recording Time..." : "Log Time" }}
+            </button>
+          </div>
+
+          <div
+            *ngIf="timeEntryMessage"
+            class="operation-message"
+            [ngClass]="{
+              'operation-success': timeEntryMessage.includes('successfully'),
+              'operation-error': !timeEntryMessage.includes('successfully'),
+            }"
+          >
+            {{ timeEntryMessage }}
+          </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- EMPTY STATE -->
+        <!-- ======================================================= -->
+
+        <div *ngIf="timeEntries.length === 0" class="empty-section">
+          <div class="empty-icon">◷</div>
+
+          <strong>No time entries</strong>
+
+          <span> Recorded work time for this ticket will appear here. </span>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- TIME ENTRY LIST -->
+        <!-- ======================================================= -->
+
+        <div *ngIf="timeEntries.length > 0" class="time-entry-list">
+          <article *ngFor="let entry of timeEntries" class="time-entry">
+            <div class="time-entry-main">
+              <strong>
+                {{ entry.userName || "System" }}
+              </strong>
+
+              <span>
+                {{ entry.description || "Work performed on ticket." }}
+              </span>
+            </div>
+
+            <div class="time-entry-meta">
+              <strong>
+                {{ formatWorkTime(entry.duration) }}
+              </strong>
+
+              <span>
+                {{ formatWorkDate(entry.workDate) }}
+              </span>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <!-- =========================================================== -->
+    <!-- SIDE COLUMN -->
+    <!-- =========================================================== -->
+
+    <aside class="ticket-side-column">
+      <!-- ========================================================= -->
+      <!-- ASSIGNMENT -->
+      <!-- ========================================================= -->
+
+      <section class="detail-card">
+        <div class="card-header">
+          <div>
+            <div class="section-eyebrow">OWNERSHIP</div>
+
+            <h2>Assignment</h2>
+          </div>
+        </div>
+
+        <div class="side-card-body">
+          <label for="ticket-agent"> Support Agent </label>
+
+          <select
+            id="ticket-agent"
+            [(ngModel)]="selectedAgentId"
+            [disabled]="isAssigning || isLoadingAgents"
+            class="form-control"
+          >
+            <option value="">
+              {{ isLoadingAgents ? "Loading agents..." : "Select an agent" }}
+            </option>
+
+            <option *ngFor="let agent of agents" [value]="agent.id">
+              {{ getAgentName(agent) }}
+            </option>
+          </select>
+
+          <button
+            type="button"
+            class="primary-button full-width"
+            [disabled]="
+              isAssigning ||
+              isLoadingAgents ||
+              !selectedAgentId ||
+              selectedAgentId === ticket.assignedAgentId
+            "
+            (click)="assignTicket()"
+          >
+            {{ isAssigning ? "Assigning..." : "Assign Ticket" }}
+          </button>
+
+          <div *ngIf="assignmentMessage" class="operation-message">
+            {{ assignmentMessage }}
+          </div>
+
+          <div class="current-assignment">
+            <span>Currently Assigned</span>
+
+            <strong>
+              {{ ticket.assignedAgentName || "Unassigned" }}
+            </strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- STATUS -->
+      <!-- ========================================================= -->
+
+      <section class="detail-card">
+        <div class="card-header">
+          <div>
+            <div class="section-eyebrow">WORKFLOW</div>
+
+            <h2>Ticket Status</h2>
+          </div>
+        </div>
+
+        <div class="side-card-body">
+          <label for="ticket-status"> Status </label>
+
+          <select
+            id="ticket-status"
+            [(ngModel)]="selectedStatus"
+            [disabled]="isUpdatingStatus"
+            class="form-control"
+          >
+            <option
+              *ngFor="let status of ticketStatuses"
+              [ngValue]="status.value"
+            >
+              {{ status.label }}
+            </option>
+          </select>
+
+          <button
+            type="button"
+            class="primary-button full-width"
+            [disabled]="
+              isUpdatingStatus ||
+              selectedStatus === null ||
+              selectedStatus === ticket.status
+            "
+            (click)="updateStatus()"
+          >
+            {{ isUpdatingStatus ? "Updating..." : "Update Status" }}
+          </button>
+
+          <div *ngIf="statusMessage" class="operation-message">
+            {{ statusMessage }}
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- TICKET METRICS -->
+      <!-- ========================================================= -->
+
+      <section class="detail-card">
+        <div class="card-header">
+          <div>
+            <div class="section-eyebrow">SUMMARY</div>
+
+            <h2>Work Summary</h2>
+          </div>
+        </div>
+
+        <div class="metrics-list">
+          <div class="metric-row">
+            <span>Comments</span>
+
+            <strong>{{ comments.length }}</strong>
+          </div>
+
+          <div class="metric-row">
+            <span>Activities</span>
+
+            <strong>{{ activities.length }}</strong>
+          </div>
+
+          <div class="metric-row">
+            <span>Time Entries</span>
+
+            <strong>{{ timeEntries.length }}</strong>
+          </div>
+
+          <div class="metric-row total">
+            <span>Total Work</span>
+
+            <strong>
+              {{ formatWorkTime(ticket.totalWorkTime) }}
+            </strong>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </main>
+</div>

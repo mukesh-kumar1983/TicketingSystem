@@ -1,0 +1,127 @@
+/**
+ * Full-page login container.
+ */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f4f6f8;
+}
+
+/**
+ * Login form card.
+ */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/**
+ * Login heading section.
+ */
+.login-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+/**
+ * Application title.
+ */
+.login-header h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+/**
+ * Login subtitle.
+ */
+.login-header p {
+  margin: 0;
+  color: #667085;
+}
+
+/**
+ * Individual form field container.
+ */
+.form-group {
+  margin-bottom: 20px;
+}
+
+/**
+ * Form labels.
+ */
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/**
+ * Text and password inputs.
+ */
+.form-group input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+}
+
+/**
+ * Input focus state.
+ */
+.form-group input:focus {
+  border-color: #344054;
+}
+
+/**
+ * Validation error text.
+ */
+.validation-message {
+  margin-top: 6px;
+  color: #d92d20;
+  font-size: 13px;
+}
+
+/**
+ * API authentication error.
+ */
+.error-message {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fef3f2;
+  color: #b42318;
+  font-size: 14px;
+}
+
+/**
+ * Login button.
+ */
+button {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #344054;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/**
+ * Disabled button state.
+ */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,0 +1,472 @@
+/**
+ * ================================================================
+ * APPLICATION SHELL
+ * ================================================================
+ */
+
+.application-shell {
+  min-height: 100vh;
+  display: flex;
+  background: #f7f8fa;
+  color: #172033;
+}
+
+/**
+ * ================================================================
+ * SIDEBAR
+ * ================================================================
+ */
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 100;
+  display: flex;
+  width: 250px;
+  flex-direction: column;
+  background: #111827;
+  color: #ffffff;
+  transition: transform 0.25s ease;
+}
+
+/**
+ * Application branding.
+ */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 78px;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/**
+ * Branding icon.
+ */
+.brand-icon {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/**
+ * Branding text container.
+ */
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+/**
+ * Application name.
+ */
+.brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/**
+ * Application subtitle.
+ */
+.brand-subtitle {
+  margin-top: 2px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/**
+ * ================================================================
+ * NAVIGATION
+ * ================================================================
+ */
+
+.navigation {
+  flex: 1;
+  padding: 28px 14px;
+  overflow-y: auto;
+}
+
+.navigation-section {
+  margin-bottom: 30px;
+}
+
+.navigation-title {
+  display: block;
+  padding: 0 12px 10px;
+  color: #6b7280;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.navigation-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  margin-bottom: 4px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.navigation-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.navigation-item.active {
+  background: #312e81;
+  color: #ffffff;
+}
+
+.navigation-icon {
+  display: flex;
+  width: 20px;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  font-size: 17px;
+}
+
+/**
+ * ================================================================
+ * SIDEBAR FOOTER
+ * ================================================================
+ */
+
+.sidebar-footer {
+  padding: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.environment-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+.environment-indicator > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.environment-title {
+  color: #e5e7eb;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.environment-subtitle {
+  margin-top: 2px;
+  color: #6b7280;
+  font-size: 10px;
+}
+
+/**
+ * ================================================================
+ * MAIN AREA
+ * ================================================================
+ */
+
+.main-area {
+  min-width: 0;
+  width: calc(100% - 250px);
+  margin-left: 250px;
+}
+
+/**
+ * ================================================================
+ * TOPBAR
+ * ================================================================
+ */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  min-height: 78px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid #e5e7eb;
+  backdrop-filter: blur(10px);
+}
+
+.topbar-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar-label {
+  color: #98a2b3;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.topbar-name {
+  margin-top: 3px;
+  color: #101828;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/**
+ * Notification button.
+ */
+.icon-button {
+  position: relative;
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: #f9fafb;
+}
+
+.notification-icon {
+  font-size: 19px;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: flex;
+  width: 17px;
+  height: 17px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/**
+ * User profile.
+ */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.user-avatar {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.user-role {
+  margin-top: 2px;
+  color: #98a2b3;
+  font-size: 10px;
+}
+
+/**
+ * Logout button.
+ */
+.logout-button {
+  padding: 9px 14px;
+  border: 1px solid #e4e7ec;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: #f9fafb;
+  color: #101828;
+}
+
+/**
+ * ================================================================
+ * PAGE CONTENT
+ * ================================================================
+ */
+
+.page-content {
+  min-height: calc(100vh - 78px);
+  padding: 30px;
+}
+
+/**
+ * ================================================================
+ * MOBILE MENU
+ * ================================================================
+ */
+
+.mobile-menu-button {
+  display: none;
+  width: 38px;
+  height: 38px;
+  padding: 8px;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.mobile-menu-button span {
+  display: block;
+  height: 2px;
+  margin: 4px 0;
+  background: #344054;
+}
+
+/**
+ * Overlay displayed behind the mobile sidebar.
+ */
+.sidebar-overlay {
+  display: none;
+}
+
+/**
+ * ================================================================
+ * RESPONSIVE DESIGN
+ * ================================================================
+ */
+
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .main-area {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .mobile-menu-button {
+    display: block;
+  }
+
+  .topbar {
+    gap: 16px;
+    padding: 0 20px;
+  }
+
+  .topbar-title {
+    flex: 1;
+  }
+
+  .user-details {
+    display: none;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: block;
+    background: rgba(15, 23, 42, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .sidebar-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .page-content {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    min-height: 68px;
+    padding: 0 14px;
+  }
+
+  .topbar-name {
+    font-size: 14px;
+  }
+
+  .topbar-actions {
+    gap: 8px;
+  }
+
+  .logout-button {
+    display: none;
+  }
+
+  .page-content {
+    padding: 20px 14px;
+  }
+}

@@ -4,16 +4,61 @@ using TicketingSystem.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// =============================================================================
+// SERVICES
+// =============================================================================
+
 // -----------------------------------------------------------------------------
 // MVC / API
 // -----------------------------------------------------------------------------
 
-// Registers ASP.NET Core MVC controllers so that API controllers such as
-// AuthController can be discovered and mapped to HTTP endpoints.
+// Registers ASP.NET Core MVC controllers.
+//
+// This allows controllers such as AuthController to be discovered and exposed
+// as HTTP API endpoints.
 builder.Services.AddControllers();
 
-// Registers API endpoint metadata required by Swagger/OpenAPI generation.
+// Registers API endpoint metadata required by Swagger/OpenAPI.
 builder.Services.AddEndpointsApiExplorer();
+
+// -----------------------------------------------------------------------------
+// CORS
+// -----------------------------------------------------------------------------
+
+// Registers Cross-Origin Resource Sharing (CORS) support.
+//
+// The Angular development application runs on:
+//
+//     http://localhost:4200
+//
+// while the ASP.NET Core API runs on:
+//
+//     https://localhost:7223
+//
+// Because these are different origins, browsers enforce the CORS policy.
+//
+// Without this configuration, the browser sends a preflight OPTIONS request
+// before certain API requests and rejects the response when the API does not
+// return the appropriate Access-Control-Allow-Origin header.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        "AngularClient",
+        policy =>
+        {
+            policy
+                // Allows requests originating from the Angular development
+                // application.
+                .WithOrigins("http://localhost:4200")
+
+                // Allows Angular to send headers such as Content-Type and
+                // Authorization.
+                .AllowAnyHeader()
+
+                // Allows HTTP methods such as GET, POST, PUT and DELETE.
+                .AllowAnyMethod();
+        });
+});
 
 // -----------------------------------------------------------------------------
 // Swagger / OpenAPI
@@ -35,10 +80,9 @@ builder.Services.AddSwaggerGen(options =>
     // JWT Bearer security definition
     // -------------------------------------------------------------------------
     //
-    // This defines the authentication mechanism that Swagger UI will use when
-    // sending JWT access tokens to the API.
+    // Defines JWT Bearer authentication for Swagger UI.
     //
-    // The resulting HTTP header will be:
+    // Swagger will send the token using:
     //
     //     Authorization: Bearer <JWT>
     //
@@ -63,16 +107,9 @@ builder.Services.AddSwaggerGen(options =>
     // Swashbuckle.AspNetCore 10.x uses the OpenAPI document-aware security
     // scheme reference.
     //
-    // We intentionally configure this through AddSecurityRequirement rather
-    // than our previous OperationFilter.
-    //
-    // This ensures that Swagger UI receives a concrete security requirement
-    // associated with the "Bearer" scheme and therefore knows that the token
-    // entered through the Authorize dialog must be sent with API requests.
-    //
-    // The empty scope collection is correct because JWT Bearer authentication
-    // does not use OAuth scopes.
-    //
+    // This associates the Bearer security scheme with the generated API
+    // document so that Swagger UI sends the JWT entered through its
+    // Authorize dialog with protected API requests.
     options.AddSecurityRequirement(
         document => new Microsoft.OpenApi.OpenApiSecurityRequirement
         {
@@ -88,7 +125,9 @@ builder.Services.AddSwaggerGen(options =>
 // Infrastructure
 // -----------------------------------------------------------------------------
 
-// Registers the application's Infrastructure services, including:
+// Registers the application's Infrastructure services.
+//
+// This includes:
 //
 // - Entity Framework Core
 // - SQL Server
@@ -100,21 +139,34 @@ builder.Services.AddSwaggerGen(options =>
 //
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Registers the application authentication service.
+// -----------------------------------------------------------------------------
+// Application services
+// -----------------------------------------------------------------------------
+
+// Registers the application-level authentication service.
+//
+// AuthenticationService is responsible for authenticating users and
+// generating the LoginResponse containing the JWT access token.
 builder.Services.AddScoped<AuthenticationService>();
 
-// -----------------------------------------------------------------------------
-// Build application
-// -----------------------------------------------------------------------------
+
+// =============================================================================
+// BUILD APPLICATION
+// =============================================================================
 
 var app = builder.Build();
+
+
+// =============================================================================
+// HTTP REQUEST PIPELINE
+// =============================================================================
 
 // -----------------------------------------------------------------------------
 // Swagger
 // -----------------------------------------------------------------------------
 
 // Swagger is enabled during development so that the API can be tested
-// independently of the React frontend.
+// independently of the Angular frontend.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -130,19 +182,42 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // -----------------------------------------------------------------------------
+// CORS
+// -----------------------------------------------------------------------------
+
+// Applies the AngularClient CORS policy to incoming HTTP requests.
+//
+// IMPORTANT:
+//
+// UseCors must be placed in the HTTP request pipeline before authentication
+// and authorization so that browser preflight requests (OPTIONS) can be
+// processed correctly.
+//
+// This is what allows:
+//
+//     http://localhost:4200
+//
+// to communicate with:
+//
+//     https://localhost:7223
+//
+app.UseCors("AngularClient");
+
+// -----------------------------------------------------------------------------
 // Authorization header diagnostic middleware
 // -----------------------------------------------------------------------------
-//
+
 // This middleware is intentionally retained while we troubleshoot the JWT
 // authentication flow.
 //
-// It tells us whether the incoming HTTP request actually contains an
-// Authorization header.
+// It tells us whether the incoming HTTP request contains an Authorization
+// header.
 //
 // IMPORTANT:
-// This middleware does not authenticate the request. Authentication is still
-// performed by ASP.NET Core's JWT Bearer authentication middleware below.
 //
+// This middleware does NOT authenticate the request.
+//
+// Actual JWT authentication is performed later by UseAuthentication().
 app.Use(async (context, next) =>
 {
     var authorizationHeader =
@@ -163,8 +238,9 @@ app.Use(async (context, next) =>
 
 // Executes JWT Bearer authentication.
 //
-// This reads the Authorization header, validates the JWT signature, issuer,
-// audience, and lifetime, and creates the authenticated ClaimsPrincipal.
+// This middleware reads the Authorization header, validates the JWT signature,
+// issuer, audience and lifetime, and creates the authenticated
+// ClaimsPrincipal when the token is valid.
 app.UseAuthentication();
 
 // -----------------------------------------------------------------------------
@@ -186,9 +262,10 @@ app.UseAuthorization();
 //
 app.MapControllers();
 
-// -----------------------------------------------------------------------------
-// Identity seeding
-// -----------------------------------------------------------------------------
+
+// =============================================================================
+// IDENTITY SEEDING
+// =============================================================================
 
 // Creates a scoped service provider and executes the Identity seed operation.
 //
@@ -199,8 +276,10 @@ using (var scope = app.Services.CreateScope())
     await IdentitySeeder.SeedAsync(scope.ServiceProvider);
 }
 
-// -----------------------------------------------------------------------------
-// Start application
-// -----------------------------------------------------------------------------
 
+// =============================================================================
+// START APPLICATION
+// =============================================================================
+
+// Starts the ASP.NET Core application and begins listening for HTTP requests.
 app.Run();

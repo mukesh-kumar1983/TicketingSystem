@@ -1,0 +1,263 @@
+<div class="application-shell">
+  <!--
+    ========================================================================
+    MOBILE SIDEBAR OVERLAY
+    ========================================================================
+
+    The overlay is displayed when the sidebar is opened on a small screen.
+
+    Clicking the overlay closes the sidebar.
+  -->
+  <div
+    class="sidebar-overlay"
+    [class.visible]="isSidebarOpen"
+    (click)="closeSidebar()"
+  ></div>
+
+  <!--
+    ========================================================================
+    SIDEBAR
+    ========================================================================
+  -->
+
+  <aside class="sidebar" [class.sidebar-open]="isSidebarOpen">
+    <!-- Application branding -->
+    <div class="brand">
+      <div class="brand-icon">TS</div>
+
+      <div class="brand-text">
+        <span class="brand-name"> Ticketing </span>
+
+        <span class="brand-subtitle"> System </span>
+      </div>
+    </div>
+
+    <!--
+      ======================================================================
+      MAIN NAVIGATION
+      ======================================================================
+    -->
+
+    <nav class="navigation">
+      <!-- Workspace navigation -->
+      <div class="navigation-section">
+        <span class="navigation-title"> WORKSPACE </span>
+
+        <!-- Dashboard -->
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="navigation-item"
+          (click)="closeSidebar()"
+        >
+          <span class="navigation-icon"> ▦ </span>
+
+          <span> Dashboard </span>
+        </a>
+
+        <!-- Tickets -->
+        <a
+          routerLink="/tickets"
+          routerLinkActive="active"
+          class="navigation-item"
+          (click)="closeSidebar()"
+        >
+          <span class="navigation-icon"> ▤ </span>
+
+          <span> Tickets </span>
+        </a>
+      </div>
+
+      <!--
+        ====================================================================
+        MANAGEMENT NAVIGATION
+        ====================================================================
+
+        Management links are rendered according to the authenticated user's
+        role.
+
+        Customers:
+        - Admin only.
+
+        Support Agents:
+        - Admin only.
+
+        Settings:
+        - All authenticated roles.
+      -->
+      <div class="navigation-section">
+        <span class="navigation-title"> MANAGEMENT </span>
+
+        <!--
+          ================================================================
+          CUSTOMERS
+          ================================================================
+
+          Customer management is an administrator-only feature.
+
+          The link is therefore hidden from:
+          - Customers.
+          - Support Agents.
+        -->
+        <a
+          *ngIf="isAdmin"
+          routerLink="/customers"
+          routerLinkActive="active"
+          class="navigation-item"
+          (click)="closeSidebar()"
+        >
+          <span class="navigation-icon"> ◉ </span>
+
+          <span> Customers </span>
+        </a>
+
+        <!--
+          ================================================================
+          SUPPORT AGENTS
+          ================================================================
+
+          Support-agent management is an administrator-only feature.
+
+          A Support Agent must not see a navigation link to the agent
+          management screen.
+        -->
+        <a
+          *ngIf="isAdmin"
+          routerLink="/agents"
+          routerLinkActive="active"
+          class="navigation-item"
+          (click)="closeSidebar()"
+        >
+          <span class="navigation-icon"> ◇ </span>
+
+          <span> Support Agents </span>
+        </a>
+
+        <!-- Settings -->
+        <a
+          routerLink="/settings"
+          routerLinkActive="active"
+          class="navigation-item"
+          (click)="closeSidebar()"
+        >
+          <span class="navigation-icon"> ⚙ </span>
+
+          <span> Settings </span>
+        </a>
+      </div>
+    </nav>
+
+    <!--
+      ======================================================================
+      SIDEBAR FOOTER
+      ======================================================================
+    -->
+
+    <div class="sidebar-footer">
+      <div class="environment-indicator">
+        <span class="status-dot"></span>
+
+        <div>
+          <span class="environment-title"> System Online </span>
+
+          <span class="environment-subtitle"> Ticketing API </span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!--
+    ========================================================================
+    MAIN APPLICATION AREA
+    ========================================================================
+  -->
+
+  <div class="main-area">
+    <!--
+      ======================================================================
+      TOP HEADER
+      ======================================================================
+    -->
+
+    <header class="topbar">
+      <!-- Mobile menu button -->
+      <button
+        type="button"
+        class="mobile-menu-button"
+        aria-label="Open navigation"
+        (click)="toggleSidebar()"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <!-- Application title -->
+      <div class="topbar-title">
+        <span class="topbar-label"> Workspace </span>
+
+        <span class="topbar-name"> Ticketing System </span>
+      </div>
+
+      <!--
+        ====================================================================
+        HEADER ACTIONS
+        ====================================================================
+      -->
+
+      <div class="topbar-actions">
+        <!-- Notification button -->
+        <button type="button" class="icon-button" aria-label="Notifications">
+          <span class="notification-icon"> ♢ </span>
+
+          <span class="notification-badge"> 3 </span>
+        </button>
+
+        <!--
+          ================================================================
+          CURRENT USER
+          ================================================================
+
+          The user information is obtained from AuthService rather than
+          being hard-coded.
+        -->
+
+        <div class="user-profile">
+          <!-- User avatar -->
+          <div class="user-avatar" [attr.aria-label]="userDisplayName">
+            {{ userInitial }}
+          </div>
+
+          <!-- User details -->
+          <div class="user-details">
+            <span class="user-name">
+              {{ userDisplayName }}
+            </span>
+
+            <span class="user-role">
+              {{ userRole }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Logout -->
+        <button type="button" class="logout-button" (click)="logout()">
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <!--
+      ======================================================================
+      PAGE CONTENT
+      ======================================================================
+
+      Child routes are rendered here.
+    -->
+
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

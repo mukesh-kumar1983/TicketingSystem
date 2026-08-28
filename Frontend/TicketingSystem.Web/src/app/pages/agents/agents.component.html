@@ -1,0 +1,329 @@
+<div class="agents-page">
+  <!-- ===================================================================== -->
+  <!-- Page Header -->
+  <!-- ===================================================================== -->
+
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">USER MANAGEMENT</div>
+
+      <h1>Support Agents</h1>
+
+      <p>Manage the support agents who handle customer tickets.</p>
+    </div>
+
+    <button type="button" class="primary-button" (click)="openCreateForm()">
+      <span class="button-icon">+</span>
+      Add Agent
+    </button>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- Global Messages -->
+  <!-- ===================================================================== -->
+  <!--
+    These messages are used for operations that do not have an active form,
+    such as loading the agent list or deleting an agent.
+
+    Create/edit errors are displayed inside the form.
+  -->
+
+  <div *ngIf="successMessage" class="message success-message">
+    {{ successMessage }}
+  </div>
+
+  <div
+    *ngIf="errorMessage && !showForm"
+    class="message error-message"
+    role="alert"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- Create / Edit Form -->
+  <!-- ===================================================================== -->
+
+  <section
+    *ngIf="showForm"
+    #formContainer
+    class="form-card"
+    [class.form-error]="errorMessage"
+  >
+    <div class="form-header">
+      <div>
+        <h2>
+          {{ isEditing ? "Edit Support Agent" : "Create Support Agent" }}
+        </h2>
+
+        <p>
+          {{
+            isEditing
+              ? "Update the support agent account information."
+              : "Create a new support agent account."
+          }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        [disabled]="isSaving"
+        (click)="closeForm()"
+        aria-label="Close"
+      >
+        ×
+      </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- Form Error -->
+    <!-- ================================================================= -->
+
+    <div
+      *ngIf="errorMessage"
+      class="form-message form-error-message"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- Agent Form -->
+    <!-- ================================================================= -->
+
+    <form class="agent-form" (ngSubmit)="saveAgent()">
+      <div class="form-grid">
+        <!-- First Name -->
+
+        <div class="form-field">
+          <label for="agentFirstName">First Name</label>
+
+          <input
+            id="agentFirstName"
+            name="firstName"
+            type="text"
+            [(ngModel)]="form.firstName"
+            placeholder="Enter first name"
+            autocomplete="given-name"
+            [disabled]="isSaving"
+          />
+        </div>
+
+        <!-- Last Name -->
+
+        <div class="form-field">
+          <label for="agentLastName">Last Name</label>
+
+          <input
+            id="agentLastName"
+            name="lastName"
+            type="text"
+            [(ngModel)]="form.lastName"
+            placeholder="Enter last name"
+            autocomplete="family-name"
+            [disabled]="isSaving"
+          />
+        </div>
+
+        <!-- Email -->
+
+        <div class="form-field">
+          <label for="agentEmail">Email Address</label>
+
+          <input
+            id="agentEmail"
+            name="email"
+            type="email"
+            [(ngModel)]="form.email"
+            placeholder="agent@example.com"
+            autocomplete="email"
+            [disabled]="isSaving"
+          />
+
+          <span class="field-hint">
+            Enter a valid email address, for example agent&#64;example.com.
+          </span>
+        </div>
+
+        <!-- Password -->
+
+        <div class="form-field" *ngIf="!isEditing">
+          <label for="agentPassword">Temporary Password</label>
+
+          <input
+            id="agentPassword"
+            name="password"
+            type="password"
+            [(ngModel)]="form.password"
+            placeholder="Enter temporary password"
+            autocomplete="new-password"
+            [disabled]="isSaving"
+          />
+
+          <span class="field-hint">Minimum 8 characters.</span>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- Form Actions -->
+      <!-- ================================================================= -->
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="isSaving"
+          (click)="closeForm()"
+        >
+          Cancel
+        </button>
+
+        <button type="submit" class="primary-button" [disabled]="isSaving">
+          <span *ngIf="!isSaving">
+            {{ isEditing ? "Save Changes" : "Create Agent" }}
+          </span>
+
+          <span *ngIf="isSaving">
+            {{ isEditing ? "Saving..." : "Creating..." }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- Agent List -->
+  <!-- ===================================================================== -->
+
+  <section class="table-card">
+    <div class="table-header">
+      <div>
+        <h2>Support Agent Accounts</h2>
+
+        <p>
+          {{ agents.length }}
+          {{ agents.length === 1 ? "agent" : "agents" }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        [disabled]="isLoading"
+        (click)="loadAgents()"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- Loading -->
+    <!-- ================================================================= -->
+
+    <div *ngIf="isLoading" class="state-container">
+      <div class="spinner"></div>
+
+      <p>Loading support agents...</p>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- Empty -->
+    <!-- ================================================================= -->
+
+    <div
+      *ngIf="!isLoading && agents.length === 0"
+      class="state-container empty-state"
+    >
+      <div class="empty-icon">👤</div>
+
+      <h3>No support agents yet</h3>
+
+      <p>Create your first support agent account to get started.</p>
+
+      <button type="button" class="primary-button" (click)="openCreateForm()">
+        Add Agent
+      </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- Agent Table -->
+    <!-- ================================================================= -->
+
+    <div *ngIf="!isLoading && agents.length > 0" class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let agent of agents">
+            <!-- Agent -->
+
+            <td>
+              <div class="agent-cell">
+                <div class="avatar">
+                  {{ getInitial(agent) }}
+                </div>
+
+                <div>
+                  <div class="agent-name">
+                    {{ agent.firstName }}
+                    {{ agent.lastName }}
+                  </div>
+
+                  <div class="agent-id">ID: {{ agent.id }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Email -->
+
+            <td>
+              <span class="email">
+                {{ agent.email }}
+              </span>
+            </td>
+
+            <!-- Role -->
+
+            <td>
+              <span class="role-badge"> Support Agent </span>
+            </td>
+
+            <!-- Actions -->
+
+            <td class="actions-column">
+              <div class="actions">
+                <button
+                  type="button"
+                  class="action-button edit-button"
+                  [disabled]="isDeleting"
+                  (click)="openEditForm(agent)"
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button delete-button"
+                  [disabled]="isDeleting"
+                  (click)="deleteAgent(agent)"
+                >
+                  <span *ngIf="!isDeletingAgent(agent)"> Delete </span>
+
+                  <span *ngIf="isDeletingAgent(agent)"> Deleting... </span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

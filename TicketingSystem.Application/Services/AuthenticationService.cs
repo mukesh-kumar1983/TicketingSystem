@@ -14,8 +14,12 @@ public sealed class AuthenticationService
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthenticationService"/> class.
     /// </summary>
-    /// <param name="identityService">The identity service.</param>
-    /// <param name="jwtTokenService">The JWT token service.</param>
+    /// <param name="identityService">
+    /// The identity service.
+    /// </param>
+    /// <param name="jwtTokenService">
+    /// The JWT token service.
+    /// </param>
     public AuthenticationService(
         IIdentityService identityService,
         IJwtTokenService jwtTokenService)
@@ -27,8 +31,12 @@ public sealed class AuthenticationService
     /// <summary>
     /// Authenticates a user and generates a JWT access token.
     /// </summary>
-    /// <param name="request">The login credentials.</param>
-    /// <returns>The authentication response.</returns>
+    /// <param name="request">
+    /// The login credentials.
+    /// </param>
+    /// <returns>
+    /// The authentication response.
+    /// </returns>
     /// <exception cref="UnauthorizedAccessException">
     /// Thrown when the supplied credentials are invalid.
     /// </exception>
@@ -51,5 +59,42 @@ public sealed class AuthenticationService
             user.FirstName,
             user.LastName,
             user.Role);
+    }
+
+    /// <summary>
+    /// Updates the profile information of the currently authenticated user.
+    /// </summary>
+    /// <param name="userId">
+    /// The identifier of the authenticated user.
+    /// </param>
+    /// <param name="request">
+    /// The new profile information.
+    /// </param>
+    /// <returns>
+    /// The updated authenticated user's information.
+    /// </returns>
+    /// <exception cref="UnauthorizedAccessException">
+    /// Thrown when the authenticated user cannot be found.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the profile cannot be updated.
+    /// </exception>
+    public async Task<AuthenticatedUser> UpdateCurrentUserAsync(
+        string userId,
+        UpdateCurrentUserRequest request)
+    {
+        var user = await _identityService.UpdateUserAsync(
+            userId,
+            request.FirstName,
+            request.LastName,
+            request.Email);
+
+        if (user is null)
+        {
+            throw new UnauthorizedAccessException(
+                "The authenticated user could not be found.");
+        }
+
+        return user;
     }
 }

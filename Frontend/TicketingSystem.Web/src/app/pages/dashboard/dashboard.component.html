@@ -1,0 +1,282 @@
+<div class="dashboard">
+  <!-- ===================================================================== -->
+  <!-- Dashboard Header                                                      -->
+  <!-- ===================================================================== -->
+
+  <header class="dashboard-header">
+    <div class="header-brand">
+      <div class="brand-icon">TS</div>
+
+      <div>
+        <h1>Ticketing System</h1>
+        <span>Support Management</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="user-summary" *ngIf="currentUser">
+        <div class="user-avatar">
+          {{ currentUser.firstName.charAt(0) }}
+        </div>
+
+        <div class="user-details">
+          <strong>
+            {{ currentUser.fullName }}
+          </strong>
+
+          <span>
+            {{ currentUser.role }}
+          </span>
+        </div>
+      </div>
+
+      <button type="button" class="logout-button" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- Main Dashboard Content                                                -->
+  <!-- ===================================================================== -->
+
+  <main class="dashboard-content">
+    <!-- =================================================================== -->
+    <!-- Page Heading                                                        -->
+    <!-- =================================================================== -->
+
+    <section class="page-heading">
+      <div>
+        <span class="eyebrow">OVERVIEW</span>
+
+        <h2>
+          Welcome back
+          <span *ngIf="currentUser"> , {{ currentUser.firstName }} </span>
+        </h2>
+
+        <p>Here's an overview of your support tickets.</p>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- Loading State                                                       -->
+    <!-- =================================================================== -->
+
+    <section class="loading-state" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+
+      <p>Loading dashboard...</p>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- Error State                                                         -->
+    <!-- =================================================================== -->
+
+    <section class="error-state" *ngIf="!isLoading && errorMessage">
+      <div class="error-icon">!</div>
+
+      <div>
+        <h3>Unable to load dashboard</h3>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- Dashboard Data                                                      -->
+    <!-- =================================================================== -->
+
+    <ng-container *ngIf="!isLoading && !errorMessage">
+      <!-- =============================================================== -->
+      <!-- Statistics Cards                                                -->
+      <!-- =============================================================== -->
+
+      <section class="statistics-grid">
+        <!-- Total -->
+        <article class="stat-card">
+          <div class="stat-icon total-icon">#</div>
+
+          <div class="stat-content">
+            <span class="stat-label"> Total Tickets </span>
+
+            <strong class="stat-value">
+              {{ totalTickets }}
+            </strong>
+          </div>
+        </article>
+
+        <!-- Open -->
+        <article class="stat-card">
+          <div class="stat-icon open-icon">O</div>
+
+          <div class="stat-content">
+            <span class="stat-label"> Open </span>
+
+            <strong class="stat-value">
+              {{ openTickets }}
+            </strong>
+          </div>
+        </article>
+
+        <!-- In Progress -->
+        <article class="stat-card">
+          <div class="stat-icon progress-icon">→</div>
+
+          <div class="stat-content">
+            <span class="stat-label"> In Progress </span>
+
+            <strong class="stat-value">
+              {{ inProgressTickets }}
+            </strong>
+          </div>
+        </article>
+
+        <!-- Resolved -->
+        <article class="stat-card">
+          <div class="stat-icon resolved-icon">✓</div>
+
+          <div class="stat-content">
+            <span class="stat-label"> Resolved </span>
+
+            <strong class="stat-value">
+              {{ resolvedTickets }}
+            </strong>
+          </div>
+        </article>
+
+        <!-- Closed -->
+        <article class="stat-card">
+          <div class="stat-icon closed-icon">✓</div>
+
+          <div class="stat-content">
+            <span class="stat-label"> Closed </span>
+
+            <strong class="stat-value">
+              {{ closedTickets }}
+            </strong>
+          </div>
+        </article>
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- Recent Tickets                                                   -->
+      <!-- =============================================================== -->
+
+      <section class="tickets-section">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow"> ACTIVITY </span>
+
+            <h3>Recent Tickets</h3>
+          </div>
+
+          <span class="ticket-count" *ngIf="recentTickets.length > 0">
+            Showing {{ recentTickets.length }} recent tickets
+          </span>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- Tickets Table                                                  -->
+        <!-- ============================================================= -->
+
+        <div class="tickets-table-container" *ngIf="recentTickets.length > 0">
+          <table class="tickets-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Ticket</th>
+                <th>Customer</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Assigned Agent</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let ticket of recentTickets">
+                <td class="ticket-id">#{{ ticket.id }}</td>
+
+                <td>
+                  <div class="ticket-title">
+                    {{ ticket.title }}
+                  </div>
+
+                  <div class="ticket-description">
+                    {{ ticket.description }}
+                  </div>
+                </td>
+
+                <td>
+                  {{ ticket.customerName }}
+                </td>
+
+                <td>
+                  <span
+                    class="priority-badge"
+                    [class.priority-low]="
+                      ticket.priority === ticketPriority.Low
+                    "
+                    [class.priority-medium]="
+                      ticket.priority === ticketPriority.Medium
+                    "
+                    [class.priority-high]="
+                      ticket.priority === ticketPriority.High
+                    "
+                    [class.priority-critical]="
+                      ticket.priority === ticketPriority.Critical
+                    "
+                  >
+                    {{ getPriorityLabel(ticket.priority) }}
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.status-open]="ticket.status === ticketStatus.Open"
+                    [class.status-progress]="
+                      ticket.status === ticketStatus.InProgress
+                    "
+                    [class.status-resolved]="
+                      ticket.status === ticketStatus.Resolved
+                    "
+                    [class.status-closed]="
+                      ticket.status === ticketStatus.Closed
+                    "
+                  >
+                    {{ getStatusLabel(ticket.status) }}
+                  </span>
+                </td>
+
+                <td>
+                  {{ ticket.assignedAgentName || "Unassigned" }}
+                </td>
+
+                <td>
+                  {{ ticket.createdAt | date: "mediumDate" }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- Empty State                                                    -->
+        <!-- ============================================================= -->
+
+        <div class="empty-state" *ngIf="recentTickets.length === 0">
+          <div class="empty-icon">✓</div>
+
+          <h4>No tickets yet</h4>
+
+          <p>
+            There are currently no support tickets available for your account.
+          </p>
+        </div>
+      </section>
+    </ng-container>
+  </main>
+</div>

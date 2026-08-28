@@ -1,0 +1,332 @@
+<div class="customers-page">
+  <!-- ===================================================================== -->
+  <!-- Page Header -->
+  <!-- ===================================================================== -->
+
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">USER MANAGEMENT</div>
+
+      <h1>Customers</h1>
+
+      <p>Manage customer accounts and their access to the ticketing system.</p>
+    </div>
+
+    <button type="button" class="primary-button" (click)="openCreateForm()">
+      <span class="button-icon">+</span>
+      Add Customer
+    </button>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- Global Messages -->
+  <!-- ===================================================================== -->
+  <!--
+    These messages are intended for operations that do not have an active
+    form, such as loading the customer list or deleting a customer.
+
+    Create/edit validation and API errors are displayed inside the form
+    instead, so the administrator does not have to look elsewhere on the page.
+  -->
+
+  <div *ngIf="successMessage" class="message success-message">
+    {{ successMessage }}
+  </div>
+
+  <div
+    *ngIf="errorMessage && !showForm"
+    class="message error-message"
+    role="alert"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- Create / Edit Form -->
+  <!-- ===================================================================== -->
+
+  <section
+    *ngIf="showForm"
+    #formContainer
+    class="form-card"
+    [class.form-error]="errorMessage"
+  >
+    <div class="form-header">
+      <div>
+        <h2>
+          {{ isEditing ? "Edit Customer" : "Create Customer" }}
+        </h2>
+
+        <p>
+          {{
+            isEditing
+              ? "Update the customer account information."
+              : "Create a new customer account."
+          }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        [disabled]="isSaving"
+        (click)="closeForm()"
+        aria-label="Close"
+      >
+        ×
+      </button>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- Form Error -->
+    <!-- ================================================================ -->
+
+    <div
+      *ngIf="errorMessage"
+      class="form-message form-error-message"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- Customer Form -->
+    <!-- ================================================================ -->
+
+    <form class="customer-form" (ngSubmit)="saveCustomer()">
+      <div class="form-grid">
+        <!-- First Name -->
+
+        <div class="form-field">
+          <label for="customerFirstName">First Name</label>
+
+          <input
+            id="customerFirstName"
+            name="firstName"
+            type="text"
+            [(ngModel)]="form.firstName"
+            placeholder="Enter first name"
+            autocomplete="given-name"
+            [disabled]="isSaving"
+          />
+        </div>
+
+        <!-- Last Name -->
+
+        <div class="form-field">
+          <label for="customerLastName">Last Name</label>
+
+          <input
+            id="customerLastName"
+            name="lastName"
+            type="text"
+            [(ngModel)]="form.lastName"
+            placeholder="Enter last name"
+            autocomplete="family-name"
+            [disabled]="isSaving"
+          />
+        </div>
+
+        <!-- Email -->
+
+        <div class="form-field">
+          <label for="customerEmail">Email Address</label>
+
+          <input
+            id="customerEmail"
+            name="email"
+            type="email"
+            [(ngModel)]="form.email"
+            placeholder="customer@example.com"
+            autocomplete="email"
+            [disabled]="isSaving"
+          />
+
+          <span class="field-hint">
+            Enter a valid email address, for example customer&#64;example.com.
+          </span>
+        </div>
+
+        <!-- Password -->
+
+        <div class="form-field" *ngIf="!isEditing">
+          <label for="customerPassword">Temporary Password</label>
+
+          <input
+            id="customerPassword"
+            name="password"
+            type="password"
+            [(ngModel)]="form.password"
+            placeholder="Enter temporary password"
+            autocomplete="new-password"
+            [disabled]="isSaving"
+          />
+
+          <span class="field-hint">Minimum 8 characters.</span>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- Form Actions -->
+      <!-- ================================================================ -->
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="secondary-button"
+          [disabled]="isSaving"
+          (click)="closeForm()"
+        >
+          Cancel
+        </button>
+
+        <button type="submit" class="primary-button" [disabled]="isSaving">
+          <span *ngIf="!isSaving">
+            {{ isEditing ? "Save Changes" : "Create Customer" }}
+          </span>
+
+          <span *ngIf="isSaving">
+            {{ isEditing ? "Saving..." : "Creating..." }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- Customer List -->
+  <!-- ===================================================================== -->
+
+  <section class="table-card">
+    <div class="table-header">
+      <div>
+        <h2>Customer Accounts</h2>
+
+        <p>
+          {{ customers.length }}
+          {{ customers.length === 1 ? "customer" : "customers" }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="refresh-button"
+        [disabled]="isLoading"
+        (click)="loadCustomers()"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- Loading -->
+    <!-- ================================================================= -->
+
+    <div *ngIf="isLoading" class="state-container">
+      <div class="spinner"></div>
+
+      <p>Loading customers...</p>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- Empty -->
+    <!-- ================================================================= -->
+
+    <div
+      *ngIf="!isLoading && customers.length === 0"
+      class="state-container empty-state"
+    >
+      <div class="empty-icon">👤</div>
+
+      <h3>No customers yet</h3>
+
+      <p>Create your first customer account to get started.</p>
+
+      <button type="button" class="primary-button" (click)="openCreateForm()">
+        Add Customer
+      </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- Customer Table -->
+    <!-- ================================================================= -->
+
+    <div *ngIf="!isLoading && customers.length > 0" class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let customer of customers">
+            <!-- Customer -->
+
+            <td>
+              <div class="customer-cell">
+                <div class="avatar">
+                  {{ getInitial(customer) }}
+                </div>
+
+                <div>
+                  <div class="customer-name">
+                    {{ customer.firstName }}
+                    {{ customer.lastName }}
+                  </div>
+
+                  <div class="customer-id">ID: {{ customer.id }}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Email -->
+
+            <td>
+              <span class="email">
+                {{ customer.email }}
+              </span>
+            </td>
+
+            <!-- Role -->
+
+            <td>
+              <span class="role-badge"> Customer </span>
+            </td>
+
+            <!-- Actions -->
+
+            <td class="actions-column">
+              <div class="actions">
+                <button
+                  type="button"
+                  class="action-button edit-button"
+                  [disabled]="isDeleting"
+                  (click)="openEditForm(customer)"
+                >
+                  Edit
+                </button>
+
+                <button
+                  type="button"
+                  class="action-button delete-button"
+                  [disabled]="isDeleting"
+                  (click)="deleteCustomer(customer)"
+                >
+                  <span *ngIf="!isDeletingCustomer(customer)"> Delete </span>
+
+                  <span *ngIf="isDeletingCustomer(customer)">
+                    Deleting...
+                  </span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

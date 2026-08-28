@@ -1,0 +1,200 @@
+/**
+ * ============================================================================
+ * TicketingSystem - Toast Component Styles
+ * ============================================================================
+ */
+
+/**
+ * ============================================================================
+ * TOAST CONTAINER
+ * ============================================================================
+ */
+
+.toast-container {
+  position: fixed;
+  z-index: 9999;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  width: min(420px, calc(100vw - 32px));
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+/**
+ * ============================================================================
+ * TOAST
+ * ============================================================================
+ */
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 14px 14px 16px;
+  border: 1px solid #eaecf0;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow:
+    0 12px 24px rgba(16, 24, 40, 0.12),
+    0 2px 6px rgba(16, 24, 40, 0.06);
+  pointer-events: auto;
+  animation: toast-slide-in 0.22s ease-out;
+}
+
+/**
+ * ============================================================================
+ * TOAST ICON
+ * ============================================================================
+ */
+
+.toast-icon {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/**
+ * ============================================================================
+ * TOAST MESSAGE
+ * ============================================================================
+ */
+
+.toast-message {
+  min-width: 0;
+  flex: 1;
+  padding-top: 4px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/**
+ * ============================================================================
+ * CLOSE BUTTON
+ * ============================================================================
+ */
+
+.toast-close {
+  display: flex;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #98a2b3;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.toast-close:hover {
+  background: #f2f4f7;
+  color: #344054;
+}
+
+/**
+ * ============================================================================
+ * SUCCESS
+ * ============================================================================
+ */
+
+.toast-success {
+  border-color: #abefc6;
+}
+
+.toast-success .toast-icon {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+/**
+ * ============================================================================
+ * ERROR
+ * ============================================================================
+ */
+
+.toast-error {
+  border-color: #fecdca;
+}
+
+.toast-error .toast-icon {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+/**
+ * ============================================================================
+ * WARNING
+ * ============================================================================
+ */
+
+.toast-warning {
+  border-color: #fedf89;
+}
+
+.toast-warning .toast-icon {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+/**
+ * ============================================================================
+ * INFORMATION
+ * ============================================================================
+ */
+
+.toast-info {
+  border-color: #c7d7fe;
+}
+
+.toast-info .toast-icon {
+  background: #eef4ff;
+  color: #3538cd;
+}
+
+/**
+ * ============================================================================
+ * ANIMATION
+ * ============================================================================
+ */
+
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/**
+ * ============================================================================
+ * RESPONSIVE
+ * ============================================================================
+ */
+
+@media (max-width: 600px) {
+  .toast-container {
+    top: 16px;
+    right: 16px;
+    width: calc(100vw - 32px);
+  }
+}

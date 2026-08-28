@@ -1,14 +1,36 @@
 <Solution>
   <Folder Name="/SolutionFolder/" />
   <Folder Name="/SolutionFolder/Backend/">
-    <Project Path="TicketingSystem.Api/TicketingSystem.Api.csproj" Id="57970936-5600-41a1-9e6c-61bd8566ad0e" />
-    <Project Path="TicketingSystem.Application/TicketingSystem.Application.csproj" />
-    <Project Path="TicketingSystem.Domain/TicketingSystem.Domain.csproj" />
-    <Project Path="TicketingSystem.Infrastructure/TicketingSystem.Infrastructure.csproj" />
+    <Project Path="D:/TicketingSystem/TicketingSystem.Api/TicketingSystem.Api.csproj" Id="57970936-5600-41a1-9e6c-61bd8566ad0e" />
+    <Project Path="D:/TicketingSystem/TicketingSystem.Application/TicketingSystem.Application.csproj" />
+    <Project Path="D:/TicketingSystem/TicketingSystem.Domain/TicketingSystem.Domain.csproj" />
+    <Project Path="D:/TicketingSystem/TicketingSystem.Infrastructure/TicketingSystem.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/SolutionFolder/Frontend/" />
+  <Folder Name="/SolutionFolder/Frontend/">
+    <Project Path="D:/TicketingSystem/Frontend/TicketingSystem.Web/" Type="Website" DisplayName="TicketingSystem.Web">
+      <BuildType Project="Debug" />
+      <Properties Name="WebsiteProperties">
+        <Property Name="Debug.AspNetCompiler.Debug" Value="&quot;True&quot;" />
+        <Property Name="Debug.AspNetCompiler.FixedNames" Value="&quot;false&quot;" />
+        <Property Name="Debug.AspNetCompiler.ForceOverwrite" Value="&quot;true&quot;" />
+        <Property Name="Debug.AspNetCompiler.PhysicalPath" Value="&quot;Frontend\TicketingSystem.Web\&quot;" />
+        <Property Name="Debug.AspNetCompiler.TargetPath" Value="&quot;PrecompiledWeb\localhost_52806\&quot;" />
+        <Property Name="Debug.AspNetCompiler.Updateable" Value="&quot;true&quot;" />
+        <Property Name="Debug.AspNetCompiler.VirtualPath" Value="&quot;/localhost_52806&quot;" />
+        <Property Name="Release.AspNetCompiler.Debug" Value="&quot;False&quot;" />
+        <Property Name="Release.AspNetCompiler.FixedNames" Value="&quot;false&quot;" />
+        <Property Name="Release.AspNetCompiler.ForceOverwrite" Value="&quot;true&quot;" />
+        <Property Name="Release.AspNetCompiler.PhysicalPath" Value="&quot;Frontend\TicketingSystem.Web\&quot;" />
+        <Property Name="Release.AspNetCompiler.TargetPath" Value="&quot;PrecompiledWeb\localhost_52806\&quot;" />
+        <Property Name="Release.AspNetCompiler.Updateable" Value="&quot;true&quot;" />
+        <Property Name="Release.AspNetCompiler.VirtualPath" Value="&quot;/localhost_52806&quot;" />
+        <Property Name="TargetFrameworkMoniker" Value="&quot;.NETFramework,Version%3Dv4.8&quot;" />
+        <Property Name="VWDPort" Value="&quot;52806&quot;" />
+      </Properties>
+    </Project>
+  </Folder>
   <Folder Name="/SolutionFolder/Tests/">
-    <Project Path="TicketingSystem.IntegrationTests/TicketingSystem.IntegrationTests.csproj" />
-    <Project Path="TicketingSystem.UnitTests/TicketingSystem.UnitTests.csproj" />
+    <Project Path="D:/TicketingSystem/TicketingSystem.IntegrationTests/TicketingSystem.IntegrationTests.csproj" />
+    <Project Path="D:/TicketingSystem/TicketingSystem.UnitTests/TicketingSystem.UnitTests.csproj" />
   </Folder>
 </Solution>

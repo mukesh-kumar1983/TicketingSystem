@@ -1,0 +1,733 @@
+/**
+ * ============================================================================
+ * TicketingSystem - Customers Page Styles
+ * ============================================================================
+ *
+ * Provides the visual styling for the Customer Management page.
+ *
+ * Design goals:
+ *
+ * - Clean enterprise administration interface.
+ * - Consistent spacing and typography.
+ * - Subtle borders and shadows.
+ * - Clear visual hierarchy.
+ * - Professional table presentation.
+ * - Responsive behavior for smaller screens.
+ * ============================================================================
+ */
+
+/* ============================================================================
+   Page Container
+   ========================================================================== */
+
+.customers-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   Page Header
+   ========================================================================== */
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.eyebrow {
+  margin-bottom: 0.4rem;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.page-header p {
+  max-width: 650px;
+  margin: 0.5rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ============================================================================
+   Buttons
+   ========================================================================== */
+
+.primary-button,
+.secondary-button,
+.refresh-button,
+.action-button,
+.close-button {
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid #2563eb;
+  border-radius: 0.5rem;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.primary-button:hover:not(:disabled) {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
+  transform: translateY(-1px);
+}
+
+.primary-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* ============================================================================
+   Messages
+   ========================================================================== */
+
+.message {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  box-sizing: border-box;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.success-message {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.error-message {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* ============================================================================
+   Create / Edit Form Card
+   ========================================================================== */
+
+.form-card {
+  margin-bottom: 1.75rem;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  border: 1px solid #dbeafe;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 18px rgba(15, 23, 42, 0.05);
+  scroll-margin-top: 1.5rem;
+}
+
+.form-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.form-header p {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #64748b;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.close-button:hover:not(:disabled) {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.close-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================================================
+   Form Layout
+   ========================================================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-field label {
+  color: #334155;
+  font-size: 0.825rem;
+  font-weight: 600;
+}
+
+.form-field input {
+  width: 100%;
+  min-height: 2.7rem;
+  padding: 0.625rem 0.75rem;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  outline: none;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.form-field input::placeholder {
+  color: #94a3b8;
+}
+
+.form-field input:hover:not(:focus) {
+  border-color: #94a3b8;
+}
+
+.form-field input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.field-hint {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* ============================================================================
+   Form Error
+   ========================================================================== */
+
+.form-message {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.form-error-message {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* ============================================================================
+   Form Actions
+   ========================================================================== */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.secondary-button:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   Customer Table Card
+   ========================================================================== */
+
+.table-card {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 4px 14px rgba(15, 23, 42, 0.035);
+}
+
+/* ============================================================================
+   Table Header
+   ========================================================================== */
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table-header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.table-header p {
+  margin: 0.3rem 0 0;
+  color: #94a3b8;
+  font-size: 0.775rem;
+}
+
+/* ============================================================================
+   Refresh Button
+   ========================================================================== */
+
+.refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.refresh-button:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.refresh-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   Table
+   ========================================================================== */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f8fafc;
+}
+
+th {
+  padding: 0.8rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+td {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #f1f5f9;
+  color: #475569;
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ============================================================================
+   Customer Cell
+   ========================================================================== */
+
+.customer-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid #dbeafe;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.customer-name {
+  color: #1e293b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.customer-id {
+  max-width: 260px;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  color: #94a3b8;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   Email
+   ========================================================================== */
+
+.email {
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+/* ============================================================================
+   Role Badge
+   ========================================================================== */
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.7rem;
+  padding: 0.3rem 0.625rem;
+  box-sizing: border-box;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   Actions
+   ========================================================================== */
+
+.actions-column {
+  width: 180px;
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.action-button {
+  min-height: 2.15rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.edit-button {
+  border-color: #dbeafe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.edit-button:hover:not(:disabled) {
+  border-color: #bfdbfe;
+  background: #dbeafe;
+}
+
+.delete-button {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.delete-button:hover:not(:disabled) {
+  border-color: #fca5a5;
+  background: #fee2e2;
+}
+
+.action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   Loading / Empty States
+   ========================================================================== */
+
+.state-container {
+  display: flex;
+  min-height: 14rem;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 2rem;
+  box-sizing: border-box;
+  color: #64748b;
+  text-align: center;
+}
+
+.state-container p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.35rem;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin-bottom: 0.35rem;
+  border-radius: 50%;
+  background: #f8fafc;
+  font-size: 1.5rem;
+}
+
+.empty-state h3 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.empty-state p {
+  max-width: 360px;
+  margin: 0 0 1rem;
+  color: #64748b;
+}
+
+/* ============================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .customers-page {
+    padding: 1.5rem;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-header .primary-button {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .customers-page {
+    padding: 1rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .form-card {
+    padding: 1.25rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1rem 1.25rem;
+  }
+
+  .refresh-button {
+    align-self: flex-start;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .customers-page {
+    padding: 0.75rem;
+  }
+
+  .page-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .page-header .primary-button {
+    width: 100%;
+  }
+
+  .form-card {
+    padding: 1rem;
+  }
+
+  .table-card {
+    border-radius: 0.625rem;
+  }
+
+  .table-header {
+    padding: 1rem;
+  }
+
+  th,
+  td {
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+  }
+}

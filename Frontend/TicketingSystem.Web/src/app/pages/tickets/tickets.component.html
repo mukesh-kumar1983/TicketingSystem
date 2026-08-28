@@ -1,0 +1,381 @@
+<div class="tickets-page">
+  <!-- ===================================================================== -->
+  <!-- PAGE HEADER -->
+  <!-- ===================================================================== -->
+
+  <section class="page-header">
+    <div>
+      <div class="eyebrow">SUPPORT</div>
+
+      <h1>Tickets</h1>
+
+      <p>Manage and track support requests.</p>
+    </div>
+
+    <!--
+      =======================================================================
+      CREATE TICKET
+      =======================================================================
+
+      Customers and administrators can create tickets.
+
+      Support Agents can still view and work with tickets, but the Create
+      Ticket action is intentionally hidden from them.
+    -->
+    <button
+      *ngIf="canCreateTicket"
+      type="button"
+      class="primary-button"
+      (click)="createTicket()"
+    >
+      <span class="button-icon">+</span>
+      Create Ticket
+    </button>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- FILTERS -->
+  <!-- ===================================================================== -->
+
+  <section class="filters-card">
+    <div class="search-field">
+      <label for="ticket-search">Search</label>
+
+      <div class="search-input-wrapper">
+        <span class="search-icon">⌕</span>
+
+        <input
+          id="ticket-search"
+          type="search"
+          [(ngModel)]="search"
+          (keyup.enter)="applyFilters()"
+          placeholder="Search by title or description..."
+        />
+      </div>
+    </div>
+
+    <div class="filter-field">
+      <label for="ticket-status">Status</label>
+
+      <select
+        id="ticket-status"
+        [(ngModel)]="selectedStatus"
+        (change)="applyFilters()"
+      >
+        <option [ngValue]="null">All statuses</option>
+
+        <option *ngFor="let status of ticketStatuses" [ngValue]="status.value">
+          {{ status.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="ticket-priority">Priority</label>
+
+      <select
+        id="ticket-priority"
+        [(ngModel)]="selectedPriority"
+        (change)="applyFilters()"
+      >
+        <option [ngValue]="null">All priorities</option>
+
+        <option
+          *ngFor="let priority of ticketPriorities"
+          [ngValue]="priority.value"
+        >
+          {{ priority.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button type="button" class="secondary-button" (click)="applyFilters()">
+        Search
+      </button>
+
+      <button type="button" class="text-button" (click)="clearFilters()">
+        Clear
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- TICKET TABLE -->
+  <!-- ===================================================================== -->
+
+  <section class="tickets-card">
+    <div class="table-toolbar">
+      <div>
+        <h2>All Tickets</h2>
+
+        <span *ngIf="!isLoading">
+          {{ totalCount }}
+          ticket{{ totalCount === 1 ? "" : "s" }}
+        </span>
+      </div>
+
+      <div class="sort-controls">
+        <label for="ticket-sort"> Sort by </label>
+
+        <select
+          id="ticket-sort"
+          [ngModel]="sortBy"
+          (ngModelChange)="changeSort($event)"
+        >
+          <option value="CreatedAt">Created date</option>
+
+          <option value="UpdatedAt">Updated date</option>
+
+          <option value="Title">Title</option>
+
+          <option value="Priority">Priority</option>
+
+          <option value="Status">Status</option>
+        </select>
+
+        <button
+          type="button"
+          class="sort-direction-button"
+          (click)="toggleSortDirection()"
+          [attr.aria-label]="
+            sortDescending ? 'Sort ascending' : 'Sort descending'
+          "
+        >
+          {{ sortDescending ? "↓" : "↑" }}
+        </button>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- ERROR -->
+    <!-- =================================================================== -->
+
+    <div *ngIf="errorMessage" class="error-message">
+      <strong> Unable to load tickets </strong>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+      <button type="button" (click)="loadTickets()">Try again</button>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- LOADING -->
+    <!-- =================================================================== -->
+
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loading-spinner"></div>
+
+      <span> Loading tickets... </span>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- EMPTY -->
+    <!-- =================================================================== -->
+
+    <div
+      *ngIf="!isLoading && !errorMessage && tickets.length === 0"
+      class="empty-state"
+    >
+      <div class="empty-icon">✓</div>
+
+      <h3>No tickets found</h3>
+
+      <p>There are no tickets matching your current filters.</p>
+
+      <button
+        *ngIf="search || selectedStatus !== null || selectedPriority !== null"
+        type="button"
+        class="secondary-button"
+        (click)="clearFilters()"
+      >
+        Clear filters
+      </button>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TABLE -->
+    <!-- =================================================================== -->
+
+    <div
+      *ngIf="!isLoading && !errorMessage && tickets.length > 0"
+      class="table-wrapper"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Customer</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assigned Agent</th>
+            <th>Created</th>
+            <th>Work Time</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            *ngFor="let ticket of tickets"
+            class="ticket-row"
+            tabindex="0"
+            role="button"
+            (click)="openTicket(ticket)"
+            (keydown.enter)="openTicket(ticket)"
+            (keydown.space)="openTicket(ticket)"
+            [attr.aria-label]="'Open ticket #' + ticket.id + ' ' + ticket.title"
+          >
+            <!-- =========================================================== -->
+            <!-- TICKET -->
+            <!-- =========================================================== -->
+
+            <td>
+              <div class="ticket-cell">
+                <div class="ticket-number">#{{ ticket.id }}</div>
+
+                <div class="ticket-information">
+                  <strong>
+                    {{ ticket.title }}
+                  </strong>
+
+                  <span>
+                    {{
+                      ticket.description
+                        ? ticket.description
+                        : "No description provided"
+                    }}
+                  </span>
+                </div>
+
+                <span class="ticket-open-indicator"> View → </span>
+              </div>
+            </td>
+
+            <!-- =========================================================== -->
+            <!-- CUSTOMER -->
+            <!-- =========================================================== -->
+
+            <td>
+              <span class="customer-name">
+                {{ ticket.customerName || "Unknown customer" }}
+              </span>
+            </td>
+
+            <!-- =========================================================== -->
+            <!-- PRIORITY -->
+            <!-- =========================================================== -->
+
+            <td>
+              <span
+                class="priority-badge"
+                [ngClass]="getPriorityClass(ticket.priority)"
+              >
+                {{ getPriorityLabel(ticket.priority) }}
+              </span>
+            </td>
+
+            <!-- =========================================================== -->
+            <!-- STATUS -->
+            <!-- =========================================================== -->
+
+            <td>
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(ticket.status)"
+              >
+                {{ getStatusLabel(ticket.status) }}
+              </span>
+            </td>
+
+            <!-- =========================================================== -->
+            <!-- AGENT -->
+            <!-- =========================================================== -->
+
+            <td>
+              <span *ngIf="ticket.assignedAgentName" class="agent-name">
+                {{ ticket.assignedAgentName }}
+              </span>
+
+              <span *ngIf="!ticket.assignedAgentName" class="unassigned">
+                Unassigned
+              </span>
+            </td>
+
+            <!-- =========================================================== -->
+            <!-- CREATED -->
+            <!-- =========================================================== -->
+
+            <td>
+              <span class="date-value">
+                {{ formatDate(ticket.createdAt) }}
+              </span>
+            </td>
+
+            <!-- =========================================================== -->
+            <!-- WORK TIME -->
+            <!-- =========================================================== -->
+
+            <td>
+              <span class="work-time">
+                {{ formatWorkTime(ticket.totalWorkTime) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- PAGINATION -->
+    <!-- =================================================================== -->
+
+    <div
+      *ngIf="!isLoading && !errorMessage && totalCount > 0"
+      class="pagination"
+    >
+      <div class="pagination-summary">
+        Showing
+        <strong>
+          {{ firstResultNumber }}
+        </strong>
+        –
+        <strong>
+          {{ lastResultNumber }}
+        </strong>
+        of
+        <strong>
+          {{ totalCount }}
+        </strong>
+      </div>
+
+      <div class="pagination-controls">
+        <button
+          type="button"
+          [disabled]="!canGoPrevious"
+          (click)="goToPage(pageNumber - 1)"
+        >
+          Previous
+        </button>
+
+        <button
+          *ngFor="let page of visiblePages"
+          type="button"
+          [class.active]="page === pageNumber"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          [disabled]="!canGoNext"
+          (click)="goToPage(pageNumber + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

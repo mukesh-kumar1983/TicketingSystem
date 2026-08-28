@@ -1,0 +1,157 @@
+/**
+ * ============================================================================
+ * TicketingSystem - Global Loading Component Styles
+ * ============================================================================
+ */
+
+/**
+ * Root loading container.
+ *
+ * The container itself does not affect normal page layout.
+ */
+.loading-container {
+  position: relative;
+  z-index: 9999;
+}
+
+/**
+ * ============================================================================
+ * Top Progress Bar
+ * ============================================================================
+ *
+ * A thin animated indicator provides immediate feedback that an API
+ * operation is in progress.
+ */
+.loading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+  z-index: 10001;
+  pointer-events: none;
+}
+
+.loading-progress-bar {
+  width: 35%;
+  height: 100%;
+  border-radius: 0 3px 3px 0;
+  background: #4f46e5;
+  animation: loading-progress 1.2s ease-in-out infinite;
+}
+
+/**
+ * ============================================================================
+ * Loading Overlay
+ * ============================================================================
+ *
+ * Covers the application while an HTTP operation is executing.
+ */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(1px);
+  z-index: 10000;
+  pointer-events: all;
+}
+
+/**
+ * ============================================================================
+ * Loading Card
+ * ============================================================================
+ *
+ * Small centered card containing the spinner and loading message.
+ */
+.loading-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 140px;
+  padding: 14px 18px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.12),
+    0 4px 10px rgba(15, 23, 42, 0.06);
+}
+
+/**
+ * ============================================================================
+ * Spinner
+ * ============================================================================
+ */
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  border: 2px solid #e2e8f0;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: loading-spin 0.75s linear infinite;
+}
+
+/**
+ * Loading text.
+ */
+.loading-text {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/**
+ * ============================================================================
+ * Animations
+ * ============================================================================
+ */
+
+/**
+ * Spinner rotation animation.
+ */
+@keyframes loading-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/**
+ * Progress-bar movement animation.
+ */
+@keyframes loading-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  50% {
+    transform: translateX(180%);
+  }
+
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+/**
+ * ============================================================================
+ * Accessibility
+ * ============================================================================
+ *
+ * Users who prefer reduced motion should not receive animated indicators.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner,
+  .loading-progress-bar {
+    animation: none;
+  }
+}

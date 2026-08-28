@@ -1,0 +1,732 @@
+/**
+ * ============================================================================
+ * TicketingSystem - Tickets Page Styles
+ * ============================================================================
+ *
+ * Provides the complete visual presentation for the Tickets page.
+ *
+ * The ticket table intentionally uses a professional enterprise-style
+ * interaction model:
+ *
+ * - Entire ticket row is clickable.
+ * - Pointer cursor is displayed.
+ * - Hover state clearly identifies the interactive row.
+ * - Keyboard focus is supported.
+ * - Ticket information is presented as normal table content rather than
+ *   looking like an input textbox.
+ * ============================================================================
+ */
+
+.tickets-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   PAGE HEADER
+   ========================================================================== */
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  margin: 6px 0 8px;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.page-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.eyebrow {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.primary-button,
+.secondary-button,
+.text-button,
+.sort-direction-button {
+  font: inherit;
+}
+
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.primary-button:hover {
+  background: #1e293b;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+
+.button-icon {
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.secondary-button {
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.secondary-button:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.text-button {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.text-button:hover {
+  color: #0f172a;
+}
+
+/* ==========================================================================
+   FILTERS
+   ========================================================================== */
+
+.filters-card {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) 190px 190px auto;
+  align-items: end;
+  gap: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.search-field,
+.filter-field {
+  min-width: 0;
+}
+
+.search-field label,
+.filter-field label,
+.sort-controls label {
+  display: block;
+  margin-bottom: 7px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  z-index: 1;
+  color: #94a3b8;
+  font-size: 18px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.search-input-wrapper input,
+.filter-field select,
+.sort-controls select {
+  width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.search-input-wrapper input {
+  padding: 0 14px 0 38px;
+}
+
+.filter-field select,
+.sort-controls select {
+  padding: 0 12px;
+}
+
+.search-input-wrapper input:focus,
+.filter-field select:focus,
+.sort-controls select:focus {
+  border-color: #64748b;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ==========================================================================
+   TICKETS CARD
+   ========================================================================== */
+
+.tickets-card {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+/* ==========================================================================
+   TABLE TOOLBAR
+   ========================================================================== */
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 22px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table-toolbar h2 {
+  margin: 0 0 4px;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.table-toolbar > div:first-child span {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-controls label {
+  margin: 0;
+}
+
+.sort-controls select {
+  width: 150px;
+}
+
+.sort-direction-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.sort-direction-button:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+thead th {
+  padding: 13px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 17px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ==========================================================================
+   CLICKABLE TICKET ROW
+   ========================================================================== */
+
+.ticket-row {
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.ticket-row:hover {
+  background: #f8fafc;
+}
+
+.ticket-row:hover .ticket-open-indicator {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.ticket-row:focus-visible {
+  background: #f8fafc;
+  box-shadow: inset 3px 0 0 #0f172a;
+}
+
+.ticket-row:active {
+  background: #f1f5f9;
+}
+
+/* ==========================================================================
+   TICKET CELL
+   ========================================================================== */
+
+.ticket-cell {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 330px;
+}
+
+.ticket-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 36px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ticket-information {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
+
+.ticket-information strong {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-information span {
+  display: block;
+  max-width: 390px;
+  overflow: hidden;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-open-indicator {
+  margin-left: auto;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   CUSTOMER / AGENT
+   ========================================================================== */
+
+.customer-name,
+.agent-name {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.unassigned {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   BADGES
+   ========================================================================== */
+
+.priority-badge,
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.priority-low {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.priority-medium {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.priority-high {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.priority-critical {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.status-open {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.status-progress {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.status-resolved {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.status-closed {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   DATE / WORK TIME
+   ========================================================================== */
+
+.date-value,
+.work-time {
+  color: #64748b;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.work-time {
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   ERROR
+   ========================================================================== */
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px;
+  padding: 14px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.error-message strong {
+  font-size: 13px;
+}
+
+.error-message span {
+  flex: 1;
+  font-size: 13px;
+}
+
+.error-message button {
+  border: 0;
+  background: transparent;
+  color: #991b1b;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   LOADING
+   ========================================================================== */
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 280px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #475569;
+  border-radius: 50%;
+  animation: tickets-spin 700ms linear infinite;
+}
+
+@keyframes tickets-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   EMPTY STATE
+   ========================================================================== */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 40px;
+  text-align: center;
+}
+
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 20px;
+}
+
+.empty-state h3 {
+  margin: 0 0 7px;
+  color: #0f172a;
+  font-size: 17px;
+}
+
+.empty-state p {
+  margin: 0 0 18px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 22px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-summary {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.pagination-summary strong {
+  color: #334155;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pagination-controls button {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.pagination-controls button.active {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.pagination-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+  .filters-card {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .search-field {
+    grid-column: 1 / -1;
+  }
+
+  .filter-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .tickets-page {
+    padding: 20px 14px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .filters-card {
+    grid-template-columns: 1fr;
+  }
+
+  .search-field {
+    grid-column: auto;
+  }
+
+  .table-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sort-controls {
+    width: 100%;
+  }
+
+  .sort-controls select {
+    flex: 1;
+  }
+
+  .pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    overflow-x: auto;
+  }
+}

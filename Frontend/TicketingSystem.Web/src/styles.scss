@@ -1,0 +1,215 @@
+/**
+ * ============================================================================
+ * TicketingSystem - Global Styles
+ * ============================================================================
+ *
+ * Global styles shared by the entire Angular application.
+ *
+ * Component-specific styles belong in their respective component SCSS files.
+ * This file provides the application's global visual foundation.
+ * ============================================================================
+ */
+
+/**
+ * ============================================================================
+ * ANGULAR MATERIAL
+ * ============================================================================
+ */
+
+@use "@angular/material" as mat;
+
+/**
+ * Include Angular Material foundational styles.
+ */
+@include mat.core();
+
+/**
+ * ============================================================================
+ * APPLICATION COLOR PALETTES
+ * ============================================================================
+ */
+
+/**
+ * Primary application palette.
+ *
+ * Indigo provides a professional enterprise/SaaS appearance.
+ */
+$ticketing-primary: mat.define-palette(mat.$indigo-palette, 600, 400, 800);
+
+/**
+ * Secondary application palette.
+ */
+$ticketing-accent: mat.define-palette(mat.$deep-purple-palette, 500, 300, 700);
+
+/**
+ * Warning/error palette.
+ */
+$ticketing-warn: mat.define-palette(mat.$red-palette);
+
+/**
+ * ============================================================================
+ * APPLICATION TYPOGRAPHY
+ * ============================================================================
+ *
+ * Inter is loaded globally from index.html.
+ */
+$ticketing-typography: mat.define-typography-config(
+  $font-family: "Inter, sans-serif",
+);
+
+/**
+ * ============================================================================
+ * APPLICATION THEME
+ * ============================================================================
+ */
+
+$ticketing-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $ticketing-primary,
+      accent: $ticketing-accent,
+      warn: $ticketing-warn,
+    ),
+    typography: $ticketing-typography,
+    density: 0,
+  )
+);
+
+/**
+ * Apply the configured theme to Angular Material components.
+ */
+@include mat.all-component-themes($ticketing-theme);
+
+/**
+ * ============================================================================
+ * GLOBAL RESET
+ * ============================================================================
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+/**
+ * ============================================================================
+ * BODY
+ * ============================================================================
+ */
+
+body {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background: #f7f8fa;
+  color: #172033;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/**
+ * ============================================================================
+ * HEADINGS
+ * ============================================================================
+ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+}
+
+/**
+ * ============================================================================
+ * FORM CONTROLS
+ * ============================================================================
+ */
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/**
+ * ============================================================================
+ * LINKS
+ * ============================================================================
+ */
+
+a {
+  color: inherit;
+}
+
+/**
+ * ============================================================================
+ * IMAGES
+ * ============================================================================
+ */
+
+img {
+  max-width: 100%;
+}
+
+/**
+ * ============================================================================
+ * SCROLLBAR
+ * ============================================================================
+ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #cbd5e1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/**
+ * ============================================================================
+ * ACCESSIBILITY
+ * ============================================================================
+ */
+
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/**
+ * ============================================================================
+ * TEXT SELECTION
+ * ============================================================================
+ */
+
+::selection {
+  background: #e0e7ff;
+  color: #312e81;
+}

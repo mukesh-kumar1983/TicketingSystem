@@ -1,54 +1,35 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+
 using TicketingSystem.Application.Interfaces;
 using TicketingSystem.Infrastructure.Authentication;
 using TicketingSystem.Infrastructure.Identity;
 using TicketingSystem.Infrastructure.Persistence;
+using TicketingSystem.Infrastructure.Services;
 
 namespace TicketingSystem.Infrastructure.DependencyInjection;
 
 /// <summary>
 /// Provides extension methods for registering Infrastructure services.
-/// 
-/// This class is responsible for configuring infrastructure-related
-/// dependencies such as:
-/// 
-/// - Entity Framework Core
-/// - SQL Server
-/// - ASP.NET Core Identity
-/// - JWT authentication
-/// - Application identity services
-/// - JWT token services
-/// 
-/// The Infrastructure project contains implementation details that are
-/// intentionally kept outside the Application and Domain layers.
+///
+/// Infrastructure contains implementations for persistence, authentication,
+/// ASP.NET Core Identity, application services that depend on Infrastructure,
+/// and other external application concerns.
 /// </summary>
 public static class InfrastructureServiceExtensions
 {
     /// <summary>
-    /// Gets the identifier assigned to the symmetric key used for signing
-    /// and validating TicketingSystem JWT access tokens.
-    /// 
-    /// Both token generation and token validation must use the same key
-    /// identifier. This is particularly important with newer versions of
-    /// Microsoft.IdentityModel, which use the JWT <c>kid</c> header to
-    /// identify the signing key.
-    /// </summary>
-    private const string JwtSigningKeyId = "TicketingSystemJwtKey";
-
-    /// <summary>
-    /// Registers persistence, Identity, authentication, and other
-    /// Infrastructure services with the application's dependency
-    /// injection container.
+    /// Registers all Infrastructure services.
     /// </summary>
     /// <param name="services">
-    /// The application's service collection.
+    /// The application's dependency injection service collection.
     /// </param>
     /// <param name="configuration">
     /// The application's configuration.
@@ -60,38 +41,95 @@ public static class InfrastructureServiceExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // ---------------------------------------------------------------------
+        // Database
+        // ---------------------------------------------------------------------
+
         RegisterDatabase(
             services,
             configuration);
 
+        // ---------------------------------------------------------------------
+        // ASP.NET Core Identity
+        // ---------------------------------------------------------------------
+
         RegisterIdentity(
             services);
+
+        // ---------------------------------------------------------------------
+        // JWT authentication
+        // ---------------------------------------------------------------------
 
         RegisterJwtAuthentication(
             services,
             configuration);
 
-        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        // ---------------------------------------------------------------------
+        // Infrastructure implementations
+        // ---------------------------------------------------------------------
 
-        services.AddScoped<IIdentityService, IdentityService>();
+        // Registers the JWT token generation service.
+        services.AddScoped<
+            IJwtTokenService,
+            JwtTokenService>();
+
+        // Registers the Identity application service.
+        services.AddScoped<
+            IIdentityService,
+            IdentityService>();
+
+        // Registers the application user-management service.
+        //
+        // UserService uses ASP.NET Core Identity to create, retrieve,
+        // update and delete Customer and SupportAgent accounts.
+        //
+        // The UsersController depends on IUserService rather than directly
+        // depending on UserService.
+        services.AddScoped<
+            IUserService,
+            UserService>();
+
+        // Registers the ticket application service.
+        //
+        // Controllers depend on ITicketService rather than directly depending
+        // on TicketService. This keeps the API layer dependent on the
+        // Application abstraction while Infrastructure supplies the concrete
+        // implementation.
+        services.AddScoped<
+            ITicketService,
+            TicketService>();
+
+
+        // Registers the ticket comment application service.
+        //
+        // Controllers depend on ICommentService rather than directly depending
+        // on CommentService. Infrastructure supplies the concrete implementation.
+        services.AddScoped<
+            ICommentService,
+            CommentService>();
+
+        // Registers the ticket comment application service.
+        services.AddScoped<
+            ICommentService,
+            CommentService>();
+
+        // Registers the ticket time-entry application service.
+        services.AddScoped<
+            ITimeEntryService,
+            TimeEntryService>();
 
         return services;
     }
 
     /// <summary>
-    /// Registers Entity Framework Core and configures SQL Server
-    /// using the application's configured connection string.
+    /// Registers Entity Framework Core and SQL Server.
     /// </summary>
     /// <param name="services">
-    /// The application's service collection.
+    /// The application's dependency injection service collection.
     /// </param>
     /// <param name="configuration">
     /// The application's configuration.
     /// </param>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the default database connection string has not
-    /// been configured.
-    /// </exception>
     private static void RegisterDatabase(
         IServiceCollection services,
         IConfiguration configuration)
@@ -116,11 +154,10 @@ public static class InfrastructureServiceExtensions
     }
 
     /// <summary>
-    /// Registers ASP.NET Core Identity and configures the application's
-    /// password and user-account requirements.
+    /// Registers ASP.NET Core Identity.
     /// </summary>
     /// <param name="services">
-    /// The application's service collection.
+    /// The application's dependency injection service collection.
     /// </param>
     private static void RegisterIdentity(
         IServiceCollection services)
@@ -128,10 +165,8 @@ public static class InfrastructureServiceExtensions
         services.AddIdentityCore<ApplicationUser>(
             options =>
             {
-                // Require every user to have a unique email address.
                 options.User.RequireUniqueEmail = true;
 
-                // Configure password requirements.
                 options.Password.RequireDigit = true;
 
                 options.Password.RequireLowercase = true;
@@ -148,26 +183,14 @@ public static class InfrastructureServiceExtensions
     }
 
     /// <summary>
-    /// Registers and configures JWT bearer authentication.
-    /// 
-    /// The same symmetric signing key is used by:
-    /// 
-    /// 1. <see cref="JwtTokenService"/> when generating JWT tokens.
-    /// 2. ASP.NET Core JWT Bearer authentication when validating JWT tokens.
-    /// 
-    /// The signing key also has an explicit KeyId so that the generated JWT
-    /// contains a <c>kid</c> header. This allows the Microsoft IdentityModel
-    /// token validation pipeline to correctly identify the configured key.
+    /// Registers JWT bearer authentication.
     /// </summary>
     /// <param name="services">
-    /// The application's service collection.
+    /// The application's dependency injection service collection.
     /// </param>
     /// <param name="configuration">
     /// The application's configuration.
     /// </param>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when required JWT configuration is missing or invalid.
-    /// </exception>
     private static void RegisterJwtAuthentication(
         IServiceCollection services,
         IConfiguration configuration)
@@ -186,7 +209,7 @@ public static class InfrastructureServiceExtensions
                 "JWT configuration has not been configured.");
 
         // ---------------------------------------------------------------------
-        // Validate the JWT configuration.
+        // Validate the JWT secret.
         // ---------------------------------------------------------------------
 
         if (string.IsNullOrWhiteSpace(
@@ -206,12 +229,20 @@ public static class InfrastructureServiceExtensions
                 "JWT SecretKey must contain at least 32 bytes.");
         }
 
+        // ---------------------------------------------------------------------
+        // Validate issuer.
+        // ---------------------------------------------------------------------
+
         if (string.IsNullOrWhiteSpace(
             jwtOptions.Issuer))
         {
             throw new InvalidOperationException(
                 "JWT Issuer has not been configured.");
         }
+
+        // ---------------------------------------------------------------------
+        // Validate audience.
+        // ---------------------------------------------------------------------
 
         if (string.IsNullOrWhiteSpace(
             jwtOptions.Audience))
@@ -221,38 +252,32 @@ public static class InfrastructureServiceExtensions
         }
 
         // ---------------------------------------------------------------------
-        // Register the strongly typed JWT configuration.
+        // Register strongly typed JWT configuration.
         // ---------------------------------------------------------------------
 
         services.Configure<JwtOptions>(
             jwtSection);
 
         // ---------------------------------------------------------------------
-        // Create the symmetric signing/validation key.
+        // Create the validation key.
         //
-        // The explicit KeyId is important. Microsoft.IdentityModel can use
-        // the JWT "kid" header to identify which signing key should be used
-        // during signature validation.
+        // IMPORTANT:
+        // This uses the exact same SecretKey and SigningKeyId used by
+        // JwtTokenService.
         // ---------------------------------------------------------------------
 
-        var signingKey =
+        var validationKey =
             new SymmetricSecurityKey(
                 secretKeyBytes)
             {
-                KeyId = JwtSigningKeyId
+                KeyId =
+                    JwtTokenService.SigningKeyId
             };
 
         // ---------------------------------------------------------------------
-        // TEMPORARY DIAGNOSTIC INFORMATION
-        // ---------------------------------------------------------------------
+        // Generate a safe fingerprint of the validation key.
         //
-        // We deliberately do NOT print the JWT secret.
-        //
-        // The SHA-256 fingerprint allows us to verify that the same secret
-        // is being used without exposing the actual secret.
-        //
-        // These diagnostics can be removed once JWT authentication has been
-        // completely verified.
+        // The actual secret is never displayed.
         // ---------------------------------------------------------------------
 
         var validationKeyFingerprint =
@@ -270,7 +295,7 @@ public static class InfrastructureServiceExtensions
 
         Console.WriteLine(
             $"JWT Validation Key ID: " +
-            $"{JwtSigningKeyId}");
+            $"{validationKey.KeyId}");
 
         Console.WriteLine(
             $"JWT Validation Issuer: " +
@@ -287,13 +312,9 @@ public static class InfrastructureServiceExtensions
         services.AddAuthentication(
             options =>
             {
-                // JWT Bearer is the default authentication mechanism for
-                // incoming API requests.
                 options.DefaultAuthenticateScheme =
                     JwtBearerDefaults.AuthenticationScheme;
 
-                // JWT Bearer is also used when an unauthenticated request
-                // needs to be challenged.
                 options.DefaultChallengeScheme =
                     JwtBearerDefaults.AuthenticationScheme;
             })
@@ -301,119 +322,95 @@ public static class InfrastructureServiceExtensions
                 options =>
                 {
                     // ---------------------------------------------------------
-                    // Configure JWT validation.
+                    // Configure token validation.
                     // ---------------------------------------------------------
 
                     options.TokenValidationParameters =
                         new TokenValidationParameters
                         {
-                            // Ensure that the JWT signature is validated.
                             ValidateIssuerSigningKey = true,
 
-                            // Use our explicitly identified symmetric key.
-                            IssuerSigningKey = signingKey,
+                            IssuerSigningKey =
+                                validationKey,
 
-                            // Ensure that the token issuer is validated.
                             ValidateIssuer = true,
 
-                            // The issuer must match the configured value.
-                            ValidIssuer = jwtOptions.Issuer,
+                            ValidIssuer =
+                                jwtOptions.Issuer,
 
-                            // Ensure that the token audience is validated.
                             ValidateAudience = true,
 
-                            // The audience must match the configured value.
-                            ValidAudience = jwtOptions.Audience,
+                            ValidAudience =
+                                jwtOptions.Audience,
 
-                            // Reject expired JWT tokens.
                             ValidateLifetime = true,
 
-                            // Allow a small amount of clock difference between
-                            // the token issuer and API server.
-                            ClockSkew = TimeSpan.FromMinutes(1)
+                            ClockSkew =
+                                TimeSpan.FromMinutes(1)
                         };
 
                     // ---------------------------------------------------------
-                    // JWT authentication diagnostics.
-                    // ---------------------------------------------------------
-                    //
-                    // These events are useful while we are verifying the
-                    // authentication pipeline. They can be removed after
-                    // authentication is confirmed to be working.
+                    // Development diagnostics.
                     // ---------------------------------------------------------
 
                     options.Events =
                         new JwtBearerEvents
                         {
-                            /// <summary>
-                            /// Executes when the JWT bearer handler receives
-                            /// an incoming HTTP request.
-                            /// </summary>
-                            OnMessageReceived = context =>
-                            {
-                                var authorizationHeader =
-                                    context.Request
-                                        .Headers
-                                        .Authorization
-                                        .ToString();
+                            OnMessageReceived =
+                                context =>
+                                {
+                                    var authorizationHeader =
+                                        context.Request
+                                            .Headers
+                                            .Authorization
+                                            .ToString();
 
-                                Console.WriteLine(
-                                    $"JWT Authorization Header: " +
-                                    $"{(string.IsNullOrWhiteSpace(
-                                        authorizationHeader)
-                                        ? "NOT PRESENT"
-                                        : "PRESENT")}");
+                                    Console.WriteLine(
+                                        "JWT Authorization Header: " +
+                                        $"{(string.IsNullOrWhiteSpace(
+                                            authorizationHeader)
+                                            ? "NOT PRESENT"
+                                            : "PRESENT")}");
 
-                                return Task.CompletedTask;
-                            },
+                                    return Task.CompletedTask;
+                                },
 
-                            /// <summary>
-                            /// Executes when JWT authentication fails.
-                            /// </summary>
-                            OnAuthenticationFailed = context =>
-                            {
-                                Console.WriteLine(
-                                    "JWT Authentication Failed:");
+                            OnAuthenticationFailed =
+                                context =>
+                                {
+                                    Console.WriteLine(
+                                        "JWT Authentication Failed:");
 
-                                Console.WriteLine(
-                                    context.Exception.ToString());
+                                    Console.WriteLine(
+                                        context.Exception);
 
-                                return Task.CompletedTask;
-                            },
+                                    return Task.CompletedTask;
+                                },
 
-                            /// <summary>
-                            /// Executes after the JWT has been successfully
-                            /// validated.
-                            /// </summary>
-                            OnTokenValidated = context =>
-                            {
-                                Console.WriteLine(
-                                    "JWT Token Successfully Validated.");
+                            OnTokenValidated =
+                                context =>
+                                {
+                                    Console.WriteLine(
+                                        "JWT Token Successfully Validated.");
 
-                                return Task.CompletedTask;
-                            },
+                                    return Task.CompletedTask;
+                                },
 
-                            /// <summary>
-                            /// Executes when the authentication handler
-                            /// challenges an unauthenticated request.
-                            /// </summary>
-                            OnChallenge = context =>
-                            {
-                                Console.WriteLine(
-                                    $"JWT Challenge: " +
-                                    $"Error={context.Error}, " +
-                                    $"Description={context.ErrorDescription}");
+                            OnChallenge =
+                                context =>
+                                {
+                                    Console.WriteLine(
+                                        $"JWT Challenge: " +
+                                        $"Error={context.Error}, " +
+                                        $"Description={context.ErrorDescription}");
 
-                                return Task.CompletedTask;
-                            }
+                                    return Task.CompletedTask;
+                                }
                         };
                 });
 
         // ---------------------------------------------------------------------
         // Register authorization services.
-        //
-        // Authorization determines whether an authenticated user has
-        // permission to access a particular endpoint or resource.
         // ---------------------------------------------------------------------
 
         services.AddAuthorization();

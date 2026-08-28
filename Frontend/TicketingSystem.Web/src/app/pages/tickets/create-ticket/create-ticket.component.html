@@ -1,0 +1,193 @@
+<div class="create-ticket-page">
+  <!--
+    ========================================================================
+    Page Header
+    ========================================================================
+  -->
+  <section class="page-header">
+    <div class="page-header-content">
+      <button type="button" class="back-button" (click)="cancel()">
+        <span class="back-icon">←</span>
+
+        Back to Tickets
+      </button>
+
+      <div class="eyebrow">Support</div>
+
+      <h1>Create Ticket</h1>
+
+      <p>
+        Submit a new support request and provide the details needed to resolve
+        your issue.
+      </p>
+    </div>
+  </section>
+
+  <!--
+    ========================================================================
+    Error Message
+    ========================================================================
+  -->
+  <section *ngIf="errorMessage" class="error-message">
+    <div class="error-icon">!</div>
+
+    <div>
+      <strong> Unable to create ticket </strong>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+    </div>
+  </section>
+
+  <!--
+    ========================================================================
+    Ticket Form
+    ========================================================================
+  -->
+  <section class="form-card">
+    <form [formGroup]="ticketForm" (ngSubmit)="submit()" novalidate>
+      <!--
+        --------------------------------------------------------------------
+        Ticket Information
+        --------------------------------------------------------------------
+      -->
+      <div class="form-section">
+        <div class="section-heading">
+          <h2>Ticket Information</h2>
+
+          <p>Describe the issue you need assistance with.</p>
+        </div>
+
+        <!--
+          ------------------------------------------------------------------
+          Title
+          ------------------------------------------------------------------
+        -->
+        <div class="form-field">
+          <label for="ticket-title">
+            Title
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="ticket-title"
+            type="text"
+            formControlName="title"
+            maxlength="200"
+            placeholder="Enter a short description of the issue"
+            [class.invalid]="titleControl.invalid && titleControl.touched"
+          />
+
+          <div class="field-footer">
+            <span
+              *ngIf="titleControl.invalid && titleControl.touched"
+              class="validation-message"
+            >
+              <span *ngIf="titleControl.errors?.['required']">
+                Ticket title is required.
+              </span>
+
+              <span *ngIf="titleControl.errors?.['maxlength']">
+                Ticket title cannot exceed 200 characters.
+              </span>
+            </span>
+
+            <span class="character-count">
+              {{ titleControl.value?.length || 0 }}/200
+            </span>
+          </div>
+        </div>
+
+        <!--
+          ------------------------------------------------------------------
+          Description
+          ------------------------------------------------------------------
+        -->
+        <div class="form-field">
+          <label for="ticket-description">
+            Description
+            <span class="required">*</span>
+          </label>
+
+          <textarea
+            id="ticket-description"
+            formControlName="description"
+            maxlength="5000"
+            rows="8"
+            placeholder="Describe the issue in detail..."
+            [class.invalid]="
+              descriptionControl.invalid && descriptionControl.touched
+            "
+          ></textarea>
+
+          <div class="field-footer">
+            <span
+              *ngIf="descriptionControl.invalid && descriptionControl.touched"
+              class="validation-message"
+            >
+              <span *ngIf="descriptionControl.errors?.['required']">
+                Ticket description is required.
+              </span>
+
+              <span *ngIf="descriptionControl.errors?.['maxlength']">
+                Description cannot exceed 5000 characters.
+              </span>
+            </span>
+
+            <span class="character-count">
+              {{ descriptionControl.value?.length || 0 }}/5000
+            </span>
+          </div>
+        </div>
+
+        <!--
+          ------------------------------------------------------------------
+          Priority
+          ------------------------------------------------------------------
+        -->
+        <div class="form-field priority-field">
+          <label for="ticket-priority">
+            Priority
+            <span class="required">*</span>
+          </label>
+
+          <select id="ticket-priority" formControlName="priority">
+            <option
+              *ngFor="let priority of ticketPriorities"
+              [ngValue]="priority.value"
+            >
+              {{ priority.label }}
+            </option>
+          </select>
+
+          <span class="field-help">
+            Select the priority that best represents the urgency of this support
+            request.
+          </span>
+        </div>
+      </div>
+
+      <!--
+        ====================================================================
+        Form Actions
+        ====================================================================
+      -->
+      <div class="form-actions">
+        <button type="button" class="secondary-button" (click)="cancel()">
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="ticketForm.invalid"
+        >
+          <span class="button-icon"> + </span>
+
+          Create Ticket
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

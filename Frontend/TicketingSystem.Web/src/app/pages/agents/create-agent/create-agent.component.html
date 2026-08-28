@@ -1,0 +1,182 @@
+<div class="create-agent-page">
+  <!-- ===================================================================== -->
+  <!-- Page Header -->
+  <!-- ===================================================================== -->
+
+  <div class="page-header">
+    <div>
+      <a routerLink="/agents" class="back-link"> ← Back to Agents </a>
+
+      <h1>Create Support Agent</h1>
+
+      <p>Create an account for a new support agent.</p>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- Form Card -->
+  <!-- ===================================================================== -->
+
+  <div class="form-card">
+    <!-- =================================================================== -->
+    <!-- Error Message -->
+    <!-- =================================================================== -->
+
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- Agent Form -->
+    <!-- =================================================================== -->
+
+    <form [formGroup]="agentForm" (ngSubmit)="createAgent()" novalidate>
+      <!-- ================================================================ -->
+      <!-- First Name -->
+      <!-- ================================================================ -->
+
+      <div class="form-group">
+        <label for="firstName"> First Name </label>
+
+        <input
+          id="firstName"
+          type="text"
+          formControlName="firstName"
+          autocomplete="given-name"
+          placeholder="Enter first name"
+          [class.invalid]="hasError('firstName')"
+        />
+
+        <div *ngIf="hasError('firstName')" class="field-error">
+          <span *ngIf="agentForm.controls.firstName.hasError('required')">
+            First name is required.
+          </span>
+
+          <span *ngIf="agentForm.controls.firstName.hasError('maxlength')">
+            First name cannot exceed 100 characters.
+          </span>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- Last Name -->
+      <!-- ================================================================ -->
+
+      <div class="form-group">
+        <label for="lastName"> Last Name </label>
+
+        <input
+          id="lastName"
+          type="text"
+          formControlName="lastName"
+          autocomplete="family-name"
+          placeholder="Enter last name"
+          [class.invalid]="hasError('lastName')"
+        />
+
+        <div *ngIf="hasError('lastName')" class="field-error">
+          <span *ngIf="agentForm.controls.lastName.hasError('required')">
+            Last name is required.
+          </span>
+
+          <span *ngIf="agentForm.controls.lastName.hasError('maxlength')">
+            Last name cannot exceed 100 characters.
+          </span>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- Email -->
+      <!-- ================================================================ -->
+
+      <div class="form-group">
+        <label for="email"> Email Address </label>
+
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="agent@example.com"
+          [class.invalid]="hasError('email')"
+        />
+
+        <div *ngIf="hasError('email')" class="field-error">
+          <span *ngIf="agentForm.controls.email.hasError('required')">
+            Email address is required.
+          </span>
+
+          <span *ngIf="agentForm.controls.email.hasError('email')">
+            Please enter a valid email address.
+          </span>
+
+          <span *ngIf="agentForm.controls.email.hasError('maxlength')">
+            Email address cannot exceed 256 characters.
+          </span>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- Password -->
+      <!-- ================================================================ -->
+
+      <div class="form-group">
+        <label for="password"> Initial Password </label>
+
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+          placeholder="Enter initial password"
+          [class.invalid]="hasError('password')"
+        />
+
+        <div class="password-help">
+          The password must contain at least 8 characters.
+        </div>
+
+        <div *ngIf="hasError('password')" class="field-error">
+          <span *ngIf="agentForm.controls.password.hasError('required')">
+            Password is required.
+          </span>
+
+          <span *ngIf="agentForm.controls.password.hasError('minlength')">
+            Password must contain at least 8 characters.
+          </span>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- Role Information -->
+      <!-- ================================================================ -->
+
+      <div class="role-information">
+        <div class="role-icon">👤</div>
+
+        <div>
+          <strong>Account Type</strong>
+
+          <p>
+            This account will automatically be created as a
+            <strong>Support Agent</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- Form Actions -->
+      <!-- ================================================================ -->
+
+      <div class="form-actions">
+        <a routerLink="/agents" class="btn btn-secondary"> Cancel </a>
+
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting"> Create Agent </span>
+
+          <span *ngIf="isSubmitting"> Creating... </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

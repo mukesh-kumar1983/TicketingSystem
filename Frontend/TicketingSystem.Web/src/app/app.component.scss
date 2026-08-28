@@ -1,0 +1,15 @@
+/**
+ * ============================================================================
+ * TicketingSystem - Root Application Component Styles
+ * ============================================================================
+ *
+ * The root component intentionally contains very little styling.
+ *
+ * Global application styling belongs in styles.scss.
+ * ============================================================================
+ */
+
+:host {
+  display: block;
+  min-height: 100vh;
+}

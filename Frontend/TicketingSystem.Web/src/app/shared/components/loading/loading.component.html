@@ -1,0 +1,35 @@
+<!--
+  ============================================================================
+  Global HTTP Loading Indicator
+  ============================================================================
+-->
+
+<div
+  *ngIf="loading$ | async"
+  class="loading-container"
+  role="status"
+  aria-live="polite"
+  aria-label="Loading"
+>
+  <!--
+    Thin progress indicator at the top of the application.
+    This provides immediate visual feedback without blocking the user.
+  -->
+  <div class="loading-progress">
+    <div class="loading-progress-bar"></div>
+  </div>
+
+  <!--
+    Semi-transparent overlay and centered spinner.
+
+    The overlay is intentionally subtle so that users understand that
+    an operation is in progress without losing the context of the page.
+  -->
+  <div class="loading-overlay">
+    <div class="loading-card">
+      <div class="loading-spinner" aria-hidden="true"></div>
+
+      <span class="loading-text"> Loading... </span>
+    </div>
+  </div>
+</div>
