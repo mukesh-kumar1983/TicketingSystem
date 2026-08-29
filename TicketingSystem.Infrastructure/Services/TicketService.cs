@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TicketingSystem.Application.DTOs.Tickets;
 using TicketingSystem.Application.Interfaces;
@@ -78,8 +79,16 @@ public sealed class TicketService : ITicketService
     {
         EnsureAuthenticated(userId, role);
 
-        var pageNumber = Math.Max(1, request.PageNumber);
-        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+        var pageNumber =
+            Math.Max(
+                1,
+                request.PageNumber);
+
+        var pageSize =
+            Math.Clamp(
+                request.PageSize,
+                1,
+                100);
 
         IQueryable<Ticket> query =
             _dbContext.Tickets.AsNoTracking();
@@ -87,17 +96,21 @@ public sealed class TicketService : ITicketService
         if (IsCustomer(role))
         {
             query = query.Where(
-                ticket => ticket.CustomerId == userId);
+                ticket =>
+                    ticket.CustomerId == userId);
         }
         else if (IsSupportAgent(role))
         {
             query = query.Where(
-                ticket => ticket.AssignedAgentId == userId);
+                ticket =>
+                    ticket.AssignedAgentId == userId);
         }
 
-        if (!string.IsNullOrWhiteSpace(request.Search))
+        if (!string.IsNullOrWhiteSpace(
+                request.Search))
         {
-            var search = request.Search.Trim();
+            var search =
+                request.Search.Trim();
 
             query = query.Where(
                 ticket =>
@@ -108,16 +121,21 @@ public sealed class TicketService : ITicketService
         if (request.Status.HasValue)
         {
             query = query.Where(
-                ticket => ticket.Status == request.Status.Value);
+                ticket =>
+                    ticket.Status ==
+                    request.Status.Value);
         }
 
         if (request.Priority.HasValue)
         {
             query = query.Where(
-                ticket => ticket.Priority == request.Priority.Value);
+                ticket =>
+                    ticket.Priority ==
+                    request.Priority.Value);
         }
 
-        if (!string.IsNullOrWhiteSpace(request.AssignedAgentId))
+        if (!string.IsNullOrWhiteSpace(
+                request.AssignedAgentId))
         {
             query = query.Where(
                 ticket =>
@@ -125,19 +143,26 @@ public sealed class TicketService : ITicketService
                     request.AssignedAgentId);
         }
 
-        query = ApplySorting(
-            query,
-            request.SortBy,
-            request.SortDescending);
+        query =
+            ApplySorting(
+                query,
+                request.SortBy,
+                request.SortDescending);
 
-        var totalCount = await query.CountAsync();
+        var totalCount =
+            await query.CountAsync();
 
-        var tickets = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+        var tickets =
+            await query
+                .Skip(
+                    (pageNumber - 1) *
+                    pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
-        var responses = await BuildResponsesAsync(tickets);
+        var responses =
+            await BuildResponsesAsync(
+                tickets);
 
         return new TicketQueryResponse
         {
@@ -156,17 +181,33 @@ public sealed class TicketService : ITicketService
     {
         EnsureAuthenticated(userId, role);
 
-        var ticket = await _dbContext.Tickets
-            .AsNoTracking()
-            .FirstOrDefaultAsync(
-                item => item.Id == ticketId);
+        var ticket =
+            await _dbContext.Tickets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    item =>
+                        item.Id == ticketId);
 
         if (ticket is null)
         {
             return null;
         }
 
-        EnsureCanView(ticket, userId, role);
+        /*
+         * Return null for a ticket that the current user is not allowed
+         * to view. The controller will translate null into HTTP 404.
+         *
+         * This is intentional security behavior for customer isolation:
+         * an authenticated customer must not be able to determine whether
+         * another customer's ticket exists.
+         */
+        if (!CanView(
+                ticket,
+                userId,
+                role))
+        {
+            return null;
+        }
 
         return await BuildResponseAsync(ticket);
     }
@@ -179,29 +220,46 @@ public sealed class TicketService : ITicketService
     {
         EnsureAuthenticated(userId, role);
 
-        var ticket = await _dbContext.Tickets
-            .AsNoTracking()
-            .FirstOrDefaultAsync(
-                item => item.Id == ticketId);
+        var ticket =
+            await _dbContext.Tickets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    item =>
+                        item.Id == ticketId);
 
         if (ticket is null)
         {
             return null;
         }
 
-        EnsureCanView(ticket, userId, role);
+        /*
+         * Use the same resource-isolation rule as GetByIdAsync.
+         *
+         * Returning null causes the controller to return NotFound rather
+         * than exposing the existence of another customer's ticket.
+         */
+        if (!CanView(
+                ticket,
+                userId,
+                role))
+        {
+            return null;
+        }
 
         var ticketResponse =
             await BuildResponseAsync(ticket);
 
-        var comments = await BuildCommentsAsync(
-            ticketId);
+        var comments =
+            await BuildCommentsAsync(
+                ticketId);
 
-        var activities = await BuildActivitiesAsync(
-            ticketId);
+        var activities =
+            await BuildActivitiesAsync(
+                ticketId);
 
-        var timeEntries = await BuildTimeEntriesAsync(
-            ticketId);
+        var timeEntries =
+            await BuildTimeEntriesAsync(
+                ticketId);
 
         return new TicketDetailsResponse
         {
@@ -221,21 +279,33 @@ public sealed class TicketService : ITicketService
     {
         EnsureAuthenticated(userId, role);
 
-        var ticket = await _dbContext.Tickets
-            .FirstOrDefaultAsync(
-                item => item.Id == ticketId);
+        var ticket =
+            await _dbContext.Tickets
+                .FirstOrDefaultAsync(
+                    item =>
+                        item.Id == ticketId);
 
         if (ticket is null)
         {
             return null;
         }
 
-        EnsureCanModify(ticket, userId, role);
+        EnsureCanModify(
+            ticket,
+            userId,
+            role);
 
-        ticket.Title = request.Title.Trim();
-        ticket.Description = request.Description.Trim();
-        ticket.Priority = request.Priority;
-        ticket.UpdatedAt = DateTime.UtcNow;
+        ticket.Title =
+            request.Title.Trim();
+
+        ticket.Description =
+            request.Description.Trim();
+
+        ticket.Priority =
+            request.Priority;
+
+        ticket.UpdatedAt =
+            DateTime.UtcNow;
 
         _dbContext.Activities.Add(
             new Activity
@@ -243,13 +313,16 @@ public sealed class TicketService : ITicketService
                 TicketId = ticket.Id,
                 UserId = userId,
                 ActivityType = "Updated",
-                Description = "Ticket details updated.",
-                CreatedAt = ticket.UpdatedAt
+                Description =
+                    "Ticket details updated.",
+                CreatedAt =
+                    ticket.UpdatedAt
             });
 
         await _dbContext.SaveChangesAsync();
 
-        return await BuildResponseAsync(ticket);
+        return await BuildResponseAsync(
+            ticket);
     }
 
     /// <inheritdoc />
@@ -259,7 +332,9 @@ public sealed class TicketService : ITicketService
         string userId,
         string role)
     {
-        EnsureAuthenticated(userId, role);
+        EnsureAuthenticated(
+            userId,
+            role);
 
         if (!IsAdmin(role))
         {
@@ -267,17 +342,20 @@ public sealed class TicketService : ITicketService
                 "Only administrators can assign tickets.");
         }
 
-        var ticket = await _dbContext.Tickets
-            .FirstOrDefaultAsync(
-                item => item.Id == ticketId);
+        var ticket =
+            await _dbContext.Tickets
+                .FirstOrDefaultAsync(
+                    item =>
+                        item.Id == ticketId);
 
         if (ticket is null)
         {
             return null;
         }
 
-        var agent = await _userManager.FindByIdAsync(
-            request.AgentId);
+        var agent =
+            await _userManager.FindByIdAsync(
+                request.AgentId);
 
         if (agent is null)
         {
@@ -285,7 +363,9 @@ public sealed class TicketService : ITicketService
                 "The specified support agent does not exist.");
         }
 
-        var roles = await _userManager.GetRolesAsync(agent);
+        var roles =
+            await _userManager.GetRolesAsync(
+                agent);
 
         if (!roles.Any(
                 roleName =>
@@ -298,8 +378,11 @@ public sealed class TicketService : ITicketService
                 "The specified user does not have the SupportAgent role.");
         }
 
-        ticket.AssignedAgentId = agent.Id;
-        ticket.UpdatedAt = DateTime.UtcNow;
+        ticket.AssignedAgentId =
+            agent.Id;
+
+        ticket.UpdatedAt =
+            DateTime.UtcNow;
 
         _dbContext.Activities.Add(
             new Activity
@@ -310,12 +393,14 @@ public sealed class TicketService : ITicketService
                 Description =
                     $"Ticket assigned to support agent " +
                     $"{agent.FirstName} {agent.LastName}.",
-                CreatedAt = ticket.UpdatedAt
+                CreatedAt =
+                    ticket.UpdatedAt
             });
 
         await _dbContext.SaveChangesAsync();
 
-        return await BuildResponseAsync(ticket);
+        return await BuildResponseAsync(
+            ticket);
     }
 
     /// <inheritdoc />
@@ -325,11 +410,15 @@ public sealed class TicketService : ITicketService
         string userId,
         string role)
     {
-        EnsureAuthenticated(userId, role);
+        EnsureAuthenticated(
+            userId,
+            role);
 
-        var ticket = await _dbContext.Tickets
-            .FirstOrDefaultAsync(
-                item => item.Id == ticketId);
+        var ticket =
+            await _dbContext.Tickets
+                .FirstOrDefaultAsync(
+                    item =>
+                        item.Id == ticketId);
 
         if (ticket is null)
         {
@@ -350,10 +439,14 @@ public sealed class TicketService : ITicketService
                 "You can only change the status of tickets assigned to you.");
         }
 
-        var previousStatus = ticket.Status;
+        var previousStatus =
+            ticket.Status;
 
-        ticket.Status = request.Status;
-        ticket.UpdatedAt = DateTime.UtcNow;
+        ticket.Status =
+            request.Status;
+
+        ticket.UpdatedAt =
+            DateTime.UtcNow;
 
         _dbContext.Activities.Add(
             new Activity
@@ -364,40 +457,57 @@ public sealed class TicketService : ITicketService
                 Description =
                     $"Ticket status changed from " +
                     $"{previousStatus} to {request.Status}.",
-                CreatedAt = ticket.UpdatedAt
+                CreatedAt =
+                    ticket.UpdatedAt
             });
 
         await _dbContext.SaveChangesAsync();
 
-        return await BuildResponseAsync(ticket);
+        return await BuildResponseAsync(
+            ticket);
     }
 
     /// <summary>
     /// Builds comments for a ticket.
     /// </summary>
     private async Task<List<Application.DTOs.Comments.CommentResponse>>
-        BuildCommentsAsync(long ticketId)
+        BuildCommentsAsync(
+            long ticketId)
     {
-        var comments = await _dbContext.Comments
-            .AsNoTracking()
-            .Where(comment => comment.TicketId == ticketId)
-            .OrderBy(comment => comment.CreatedAt)
-            .ToListAsync();
+        var comments =
+            await _dbContext.Comments
+                .AsNoTracking()
+                .Where(
+                    comment =>
+                        comment.TicketId == ticketId)
+                .OrderBy(
+                    comment =>
+                        comment.CreatedAt)
+                .ToListAsync();
 
         if (comments.Count == 0)
         {
             return new List<Application.DTOs.Comments.CommentResponse>();
         }
 
-        var userIds = comments
-            .Select(comment => comment.UserId)
-            .Distinct()
-            .ToList();
+        var userIds =
+            comments
+                .Select(
+                    comment =>
+                        comment.UserId)
+                .Distinct()
+                .ToList();
 
-        var users = await _dbContext.Users
-            .AsNoTracking()
-            .Where(user => userIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id);
+        var users =
+            await _dbContext.Users
+                .AsNoTracking()
+                .Where(
+                    user =>
+                        userIds.Contains(
+                            user.Id))
+                .ToDictionaryAsync(
+                    user =>
+                        user.Id);
 
         return comments
             .Select(
@@ -426,28 +536,43 @@ public sealed class TicketService : ITicketService
     /// Builds the activity timeline for a ticket.
     /// </summary>
     private async Task<List<Application.DTOs.Activities.ActivityResponse>>
-        BuildActivitiesAsync(long ticketId)
+        BuildActivitiesAsync(
+            long ticketId)
     {
-        var activities = await _dbContext.Activities
-            .AsNoTracking()
-            .Where(activity => activity.TicketId == ticketId)
-            .OrderBy(activity => activity.CreatedAt)
-            .ToListAsync();
+        var activities =
+            await _dbContext.Activities
+                .AsNoTracking()
+                .Where(
+                    activity =>
+                        activity.TicketId == ticketId)
+                .OrderBy(
+                    activity =>
+                        activity.CreatedAt)
+                .ToListAsync();
 
         if (activities.Count == 0)
         {
             return new List<Application.DTOs.Activities.ActivityResponse>();
         }
 
-        var userIds = activities
-            .Select(activity => activity.UserId)
-            .Distinct()
-            .ToList();
+        var userIds =
+            activities
+                .Select(
+                    activity =>
+                        activity.UserId)
+                .Distinct()
+                .ToList();
 
-        var users = await _dbContext.Users
-            .AsNoTracking()
-            .Where(user => userIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id);
+        var users =
+            await _dbContext.Users
+                .AsNoTracking()
+                .Where(
+                    user =>
+                        userIds.Contains(
+                            user.Id))
+                .ToDictionaryAsync(
+                    user =>
+                        user.Id);
 
         return activities
             .Select(
@@ -465,9 +590,12 @@ public sealed class TicketService : ITicketService
                         UserName = user is null
                             ? string.Empty
                             : BuildFullName(user),
-                        ActivityType = activity.ActivityType,
-                        Description = activity.Description,
-                        CreatedAt = activity.CreatedAt
+                        ActivityType =
+                            activity.ActivityType,
+                        Description =
+                            activity.Description,
+                        CreatedAt =
+                            activity.CreatedAt
                     };
                 })
             .ToList();
@@ -477,29 +605,46 @@ public sealed class TicketService : ITicketService
     /// Builds time entries for a ticket.
     /// </summary>
     private async Task<List<Application.DTOs.TimeEntries.TimeEntryResponse>>
-        BuildTimeEntriesAsync(long ticketId)
+        BuildTimeEntriesAsync(
+            long ticketId)
     {
-        var entries = await _dbContext.TimeEntries
-            .AsNoTracking()
-            .Where(entry => entry.TicketId == ticketId)
-            .OrderBy(entry => entry.WorkDate)
-            .ThenBy(entry => entry.Id)
-            .ToListAsync();
+        var entries =
+            await _dbContext.TimeEntries
+                .AsNoTracking()
+                .Where(
+                    entry =>
+                        entry.TicketId == ticketId)
+                .OrderBy(
+                    entry =>
+                        entry.WorkDate)
+                .ThenBy(
+                    entry =>
+                        entry.Id)
+                .ToListAsync();
 
         if (entries.Count == 0)
         {
             return new List<Application.DTOs.TimeEntries.TimeEntryResponse>();
         }
 
-        var userIds = entries
-            .Select(entry => entry.UserId)
-            .Distinct()
-            .ToList();
+        var userIds =
+            entries
+                .Select(
+                    entry =>
+                        entry.UserId)
+                .Distinct()
+                .ToList();
 
-        var users = await _dbContext.Users
-            .AsNoTracking()
-            .Where(user => userIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id);
+        var users =
+            await _dbContext.Users
+                .AsNoTracking()
+                .Where(
+                    user =>
+                        userIds.Contains(
+                            user.Id))
+                .ToDictionaryAsync(
+                    user =>
+                        user.Id);
 
         return entries
             .Select(
@@ -533,27 +678,54 @@ public sealed class TicketService : ITicketService
         string? sortBy,
         bool descending)
     {
-        return sortBy?.Trim().ToLowerInvariant() switch
+        return sortBy?
+            .Trim()
+            .ToLowerInvariant() switch
         {
-            "title" => descending
-                ? query.OrderByDescending(ticket => ticket.Title)
-                : query.OrderBy(ticket => ticket.Title),
+            "title" =>
+                descending
+                    ? query.OrderByDescending(
+                        ticket =>
+                            ticket.Title)
+                    : query.OrderBy(
+                        ticket =>
+                            ticket.Title),
 
-            "priority" => descending
-                ? query.OrderByDescending(ticket => ticket.Priority)
-                : query.OrderBy(ticket => ticket.Priority),
+            "priority" =>
+                descending
+                    ? query.OrderByDescending(
+                        ticket =>
+                            ticket.Priority)
+                    : query.OrderBy(
+                        ticket =>
+                            ticket.Priority),
 
-            "status" => descending
-                ? query.OrderByDescending(ticket => ticket.Status)
-                : query.OrderBy(ticket => ticket.Status),
+            "status" =>
+                descending
+                    ? query.OrderByDescending(
+                        ticket =>
+                            ticket.Status)
+                    : query.OrderBy(
+                        ticket =>
+                            ticket.Status),
 
-            "updatedat" => descending
-                ? query.OrderByDescending(ticket => ticket.UpdatedAt)
-                : query.OrderBy(ticket => ticket.UpdatedAt),
+            "updatedat" =>
+                descending
+                    ? query.OrderByDescending(
+                        ticket =>
+                            ticket.UpdatedAt)
+                    : query.OrderBy(
+                        ticket =>
+                            ticket.UpdatedAt),
 
-            "createdat" or _ => descending
-                ? query.OrderByDescending(ticket => ticket.CreatedAt)
-                : query.OrderBy(ticket => ticket.CreatedAt)
+            "createdat" or _ =>
+                descending
+                    ? query.OrderByDescending(
+                        ticket =>
+                            ticket.CreatedAt)
+                    : query.OrderBy(
+                        ticket =>
+                            ticket.CreatedAt)
         };
     }
 
@@ -563,8 +735,9 @@ public sealed class TicketService : ITicketService
     private async Task<TicketResponse> BuildResponseAsync(
         Ticket ticket)
     {
-        var responses = await BuildResponsesAsync(
-            new[] { ticket });
+        var responses =
+            await BuildResponsesAsync(
+                new[] { ticket });
 
         return responses[0];
     }
@@ -580,47 +753,71 @@ public sealed class TicketService : ITicketService
             return new List<TicketResponse>();
         }
 
-        var userIds = tickets
-            .SelectMany(
-                ticket =>
-                    new[]
-                    {
-                        ticket.CustomerId,
-                        ticket.AssignedAgentId
-                    })
-            .Where(id => !string.IsNullOrWhiteSpace(id))
-            .Distinct()
-            .ToList();
+        var userIds =
+            tickets
+                .SelectMany(
+                    ticket =>
+                        new[]
+                        {
+                            ticket.CustomerId,
+                            ticket.AssignedAgentId
+                        })
+                .Where(
+                    id =>
+                        !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
 
-        var users = await _dbContext.Users
-            .AsNoTracking()
-            .Where(user => userIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id);
+        var users =
+            await _dbContext.Users
+                .AsNoTracking()
+                .Where(
+                    user =>
+                        userIds.Contains(
+                            user.Id))
+                .ToDictionaryAsync(
+                    user =>
+                        user.Id);
 
-        var ticketIds = tickets
-            .Select(ticket => ticket.Id)
-            .ToList();
+        var ticketIds =
+            tickets
+                .Select(
+                    ticket =>
+                        ticket.Id)
+                .ToList();
 
-        var timeEntries = await _dbContext.TimeEntries
-            .AsNoTracking()
-            .Where(entry => ticketIds.Contains(entry.TicketId))
-            .Select(
-                entry => new
-                {
-                    entry.TicketId,
-                    entry.Duration
-                })
-            .ToListAsync();
+        var timeEntries =
+            await _dbContext.TimeEntries
+                .AsNoTracking()
+                .Where(
+                    entry =>
+                        ticketIds.Contains(
+                            entry.TicketId))
+                .Select(
+                    entry =>
+                        new
+                        {
+                            entry.TicketId,
+                            entry.Duration
+                        })
+                .ToListAsync();
 
-        var workTimes = timeEntries
-            .GroupBy(entry => entry.TicketId)
-            .ToDictionary(
-                group => group.Key,
-                group =>
-                    group.Aggregate(
-                        TimeSpan.Zero,
-                        (total, entry) =>
-                            total + entry.Duration));
+        var workTimes =
+            timeEntries
+                .GroupBy(
+                    entry =>
+                        entry.TicketId)
+                .ToDictionary(
+                    group =>
+                        group.Key,
+                    group =>
+                        group.Aggregate(
+                            TimeSpan.Zero,
+                            (
+                                total,
+                                entry) =>
+                                total +
+                                entry.Duration));
 
         return tickets
             .Select(
@@ -630,7 +827,8 @@ public sealed class TicketService : ITicketService
                         ticket.CustomerId,
                         out var customer);
 
-                    ApplicationUser? agent = null;
+                    ApplicationUser? agent =
+                        null;
 
                     if (!string.IsNullOrWhiteSpace(
                             ticket.AssignedAgentId))
@@ -655,7 +853,8 @@ public sealed class TicketService : ITicketService
                         CustomerName = customer is null
                             ? string.Empty
                             : BuildFullName(customer),
-                        AssignedAgentId = ticket.AssignedAgentId,
+                        AssignedAgentId =
+                            ticket.AssignedAgentId,
                         AssignedAgentName = agent is null
                             ? null
                             : BuildFullName(agent),
@@ -688,32 +887,35 @@ public sealed class TicketService : ITicketService
     }
 
     /// <summary>
-    /// Ensures that a user can view a ticket.
+    /// Determines whether the specified user can view the ticket.
+    ///
+    /// Administrators can view every ticket.
+    /// Customers can view their own tickets.
+    /// Support agents can view tickets assigned to them.
     /// </summary>
-    private static void EnsureCanView(
+    private static bool CanView(
         Ticket ticket,
         string userId,
         string role)
     {
         if (IsAdmin(role))
         {
-            return;
+            return true;
         }
 
         if (IsCustomer(role) &&
             ticket.CustomerId == userId)
         {
-            return;
+            return true;
         }
 
         if (IsSupportAgent(role) &&
             ticket.AssignedAgentId == userId)
         {
-            return;
+            return true;
         }
 
-        throw new UnauthorizedAccessException(
-            "You are not authorized to view this ticket.");
+        return false;
     }
 
     /// <summary>
@@ -748,7 +950,8 @@ public sealed class TicketService : ITicketService
     /// <summary>
     /// Determines whether the user is an administrator.
     /// </summary>
-    private static bool IsAdmin(string role)
+    private static bool IsAdmin(
+        string role)
     {
         return string.Equals(
             role,
@@ -759,7 +962,8 @@ public sealed class TicketService : ITicketService
     /// <summary>
     /// Determines whether the user is a support agent.
     /// </summary>
-    private static bool IsSupportAgent(string role)
+    private static bool IsSupportAgent(
+        string role)
     {
         return string.Equals(
             role,
@@ -770,7 +974,8 @@ public sealed class TicketService : ITicketService
     /// <summary>
     /// Determines whether the user is a customer.
     /// </summary>
-    private static bool IsCustomer(string role)
+    private static bool IsCustomer(
+        string role)
     {
         return string.Equals(
             role,
@@ -787,8 +992,12 @@ public sealed class TicketService : ITicketService
         var fullName =
             $"{user.FirstName} {user.LastName}".Trim();
 
-        return string.IsNullOrWhiteSpace(fullName)
-            ? user.Email ?? user.UserName ?? user.Id
+        return string.IsNullOrWhiteSpace(
+            fullName)
+            ? user.Email ??
+              user.UserName ??
+              user.Id
             : fullName;
     }
 }
+

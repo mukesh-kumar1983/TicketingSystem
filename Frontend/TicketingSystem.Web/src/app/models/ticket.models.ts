@@ -3,12 +3,12 @@
  * TicketingSystem - Ticket Models
  * ============================================================================
  *
- * TypeScript models corresponding to the ticket DTOs exposed by the
+ * TypeScript models corresponding to the ticket-related DTOs exposed by the
  * TicketingSystem ASP.NET Core API.
  *
  * The backend currently serializes TicketStatus and TicketPriority as
- * numeric enum values. The TypeScript enums therefore intentionally use
- * the same numeric values as the backend.
+ * numeric enum values. The TypeScript enums therefore intentionally use the
+ * same numeric values as the backend.
  * ============================================================================
  */
 
@@ -85,8 +85,8 @@ export interface CreateTicketRequest {
 /**
  * Represents the information required to add a comment to a ticket.
  *
- * The backend associates the authenticated user with the comment, so
- * the frontend only supplies the comment content.
+ * The backend associates the authenticated user with the comment, so the
+ * frontend only supplies the comment content.
  */
 export interface AddTicketCommentRequest {
   /**
@@ -268,40 +268,58 @@ export interface TicketResponse {
 
 /**
  * Represents a comment associated with a ticket.
+ *
+ * This interface intentionally matches the actual JSON returned by:
+ *
+ * GET /api/Tickets/{id}/details
+ *
+ * Example:
+ *
+ * {
+ *   "id": 1,
+ *   "ticketId": 3,
+ *   "userId": "...",
+ *   "userName": "Admin User",
+ *   "content": "Fix it soom",
+ *   "createdAt": "2026-08-29T05:14:06.8957121"
+ * }
  */
 export interface TicketCommentResponse {
   /**
    * Comment identifier.
    */
-  id?: number;
+  id: number;
+
+  /**
+   * Ticket associated with the comment.
+   */
+  ticketId: number;
 
   /**
    * User who created the comment.
    */
-  userId?: string;
+  userId: string;
 
   /**
    * Comment author's display name.
    */
-  userName?: string;
+  userName: string;
 
   /**
    * Comment text.
    */
-  content?: string;
-
-  /**
-   * Alternative property used by some DTO representations.
-   */
-  text?: string;
+  content: string;
 
   /**
    * Comment creation timestamp.
    */
-  createdAt?: string;
+  createdAt: string;
 
   /**
    * Last modification timestamp.
+   *
+   * This property is optional because the current backend response does not
+   * include it.
    */
   updatedAt?: string;
 }
@@ -313,7 +331,27 @@ export interface TicketActivityResponse {
   /**
    * Activity identifier.
    */
-  id?: number;
+  id: number;
+
+  /**
+   * Ticket associated with the activity.
+   */
+  ticketId?: number;
+
+  /**
+   * User responsible for the activity.
+   */
+  userId?: string;
+
+  /**
+   * User display name.
+   */
+  userName?: string;
+
+  /**
+   * Activity type.
+   */
+  activityType?: string;
 
   /**
    * Description of the activity.
@@ -321,14 +359,9 @@ export interface TicketActivityResponse {
   description?: string;
 
   /**
-   * Activity message.
+   * Alternative activity message.
    */
   message?: string;
-
-  /**
-   * User responsible for the activity.
-   */
-  userName?: string;
 
   /**
    * Activity creation timestamp.
@@ -338,8 +371,6 @@ export interface TicketActivityResponse {
 
 /**
  * Represents recorded work returned by the Time Entries API.
- *
- * This interface intentionally matches the backend TimeEntryResponse DTO.
  *
  * Backend properties:
  *
@@ -397,15 +428,10 @@ export interface TicketTimeEntryResponse {
  *
  * IMPORTANT:
  *
- * This is an envelope around the ticket.
+ * The actual ticket is contained inside the `ticket` property.
  *
- * The actual ticket is available through:
- *
- * response.ticket
- *
- * and not directly through:
- *
- * response.id
+ * Comments, activities and time entries are returned as separate collections
+ * in the same response envelope.
  */
 export interface TicketDetailsResponse {
   /**
@@ -427,6 +453,14 @@ export interface TicketDetailsResponse {
    * Recorded work-time entries.
    */
   timeEntries: TicketTimeEntryResponse[];
+
+  /**
+   * Total recorded work time returned by the details endpoint.
+   *
+   * The backend currently returns this at the details-envelope level as well
+   * as inside the ticket representation.
+   */
+  totalWorkTime?: string;
 }
 
 /**

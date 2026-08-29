@@ -16,12 +16,13 @@ public sealed class TicketsController : ControllerBase
 {
     private readonly ITicketService _ticketService;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TicketsController"/> class.
-    /// </summary>
-    /// <param name="ticketService">The ticket application service.</param>
-    public TicketsController(
-        ITicketService ticketService)
+
+/// <summary>
+/// Initializes a new instance of the <see cref="TicketsController"/> class.
+/// </summary>
+/// <param name="ticketService">The ticket application service.</param>
+public TicketsController(
+    ITicketService ticketService)
     {
         _ticketService = ticketService;
     }
@@ -178,7 +179,9 @@ public sealed class TicketsController : ControllerBase
     /// </summary>
     [HttpPatch("{id:long}/status")]
     [ProducesResponseType(typeof(TicketResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TicketResponse>> UpdateStatus(
         long id,
@@ -220,4 +223,6 @@ public sealed class TicketsController : ControllerBase
                ?? throw new UnauthorizedAccessException(
                    "The authenticated user's role is missing.");
     }
+
+
 }

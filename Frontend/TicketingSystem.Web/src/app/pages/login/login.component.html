@@ -1,70 +1,308 @@
 <div class="login-page">
-  <div class="login-card">
-    <div class="login-header">
-      <h1>Ticketing System</h1>
+  <div class="login-shell">
+    <!-- ============================================================= -->
+    <!-- LEFT BRANDING PANEL -->
+    <!-- ============================================================= -->
 
-      <p>Sign in to continue</p>
-    </div>
+    <section class="branding-panel">
+      <div class="branding-content">
+        <div class="brand-mark">
+          <span class="brand-mark-icon">✓</span>
+        </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
-      <div class="form-group">
-        <label for="email"> Email address </label>
+        <div class="brand-eyebrow">TICKETING SYSTEM</div>
 
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-          autocomplete="email"
-          placeholder="Enter your email"
-        />
+        <h1>Manage support.<br />Resolve faster.</h1>
 
-        <div
-          class="validation-message"
-          *ngIf="
-            loginForm.controls.email.touched && loginForm.controls.email.invalid
-          "
-        >
-          <span *ngIf="loginForm.controls.email.errors?.['required']">
-            Email address is required.
-          </span>
+        <p class="branding-description">
+          A simple and powerful workspace for managing tickets, customers,
+          support agents, communication, and work activity.
+        </p>
 
-          <span *ngIf="loginForm.controls.email.errors?.['email']">
-            Please enter a valid email address.
-          </span>
+        <div class="feature-list">
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+
+            <div>
+              <strong>Organize tickets</strong>
+
+              <span>Keep every support request in one place.</span>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+
+            <div>
+              <strong>Collaborate with your team</strong>
+
+              <span>Assign work and keep everyone informed.</span>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+
+            <div>
+              <strong>Track your work</strong>
+
+              <span>Record comments, activities and time entries.</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="password"> Password </label>
+      <div class="branding-footer">
+        <span>Professional support management</span>
+      </div>
+    </section>
 
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          autocomplete="current-password"
-          placeholder="Enter your password"
-        />
+    <!-- ============================================================= -->
+    <!-- RIGHT LOGIN PANEL -->
+    <!-- ============================================================= -->
 
-        <div
-          class="validation-message"
-          *ngIf="
-            loginForm.controls.password.touched &&
-            loginForm.controls.password.invalid
-          "
-        >
-          Password is required.
+    <section class="login-panel">
+      <div class="login-content">
+        <div class="login-header">
+          <div class="mobile-brand-mark">
+            <span>✓</span>
+          </div>
+
+          <div class="login-eyebrow">WELCOME BACK</div>
+
+          <h2>Sign in to your account</h2>
+
+          <p>
+            Enter your credentials to access your Ticketing System workspace.
+          </p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+          <!-- ========================================================= -->
+          <!-- EMAIL -->
+          <!-- ========================================================= -->
+
+          <div class="form-group">
+            <label for="email">Email address</label>
+
+            <div
+              class="input-wrapper"
+              [class.input-error]="
+                loginForm.controls.email.touched &&
+                loginForm.controls.email.invalid
+              "
+            >
+              <span class="input-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 6.5C4 5.67157 4.67157 5 5.5 5H18.5C19.3284 5 20 5.67157 20 6.5V17.5C20 18.3284 19.3284 19 18.5 19H5.5C4.67157 19 4 18.3284 4 17.5V6.5Z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+
+                  <path
+                    d="M5 7L12 12.5L19 7"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                autocomplete="email"
+                placeholder="Enter your email address"
+              />
+            </div>
+
+            <div
+              class="validation-message"
+              *ngIf="
+                loginForm.controls.email.touched &&
+                loginForm.controls.email.invalid
+              "
+            >
+              <span *ngIf="loginForm.controls.email.errors?.['required']">
+                Email address is required.
+              </span>
+
+              <span *ngIf="loginForm.controls.email.errors?.['email']">
+                Please enter a valid email address.
+              </span>
+            </div>
+          </div>
+
+          <!-- ========================================================= -->
+          <!-- PASSWORD -->
+          <!-- ========================================================= -->
+
+          <div class="form-group">
+            <label for="password">Password</label>
+
+            <div
+              class="input-wrapper"
+              [class.input-error]="
+                loginForm.controls.password.touched &&
+                loginForm.controls.password.invalid
+              "
+            >
+              <span class="input-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="5"
+                    y="10"
+                    width="14"
+                    height="10"
+                    rx="2"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+
+                  <path
+                    d="M8 10V7.5C8 5.29086 9.79086 3.5 12 3.5C14.2091 3.5 16 5.29086 16 7.5V10"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                  />
+
+                  <circle cx="12" cy="15" r="1.2" fill="currentColor" />
+                </svg>
+              </span>
+
+              <input
+                id="password"
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                autocomplete="current-password"
+                placeholder="Enter your password"
+              />
+
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="
+                  showPassword ? 'Hide password' : 'Show password'
+                "
+              >
+                <svg
+                  *ngIf="!showPassword"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M2.5 12C4.5 8.5 7.7 6.5 12 6.5C16.3 6.5 19.5 8.5 21.5 12C19.5 15.5 16.3 17.5 12 17.5C7.7 17.5 4.5 15.5 2.5 12Z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linejoin="round"
+                  />
+
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="2.5"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
+                </svg>
+
+                <svg
+                  *ngIf="showPassword"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3 3L21 21"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                  />
+
+                  <path
+                    d="M10.6 6.7C11.05 6.57 11.52 6.5 12 6.5C16.3 6.5 19.5 8.5 21.5 12C20.72 13.36 19.75 14.49 18.6 15.37"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                  />
+
+                  <path
+                    d="M6.4 8.63C4.85 9.45 3.56 10.57 2.5 12C4.5 15.5 7.7 17.5 12 17.5C13.22 17.5 14.37 17.3 15.42 16.91"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div
+              class="validation-message"
+              *ngIf="
+                loginForm.controls.password.touched &&
+                loginForm.controls.password.invalid
+              "
+            >
+              Password is required.
+            </div>
+          </div>
+
+          <!-- ========================================================= -->
+          <!-- API ERROR -->
+          <!-- ========================================================= -->
+
+          <div class="error-message" *ngIf="errorMessage">
+            <span class="error-icon">!</span>
+
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <!-- ========================================================= -->
+          <!-- LOGIN BUTTON -->
+          <!-- ========================================================= -->
+
+          <button type="submit" class="login-button" [disabled]="isLoading">
+            <span *ngIf="!isLoading">
+              Sign in
+
+              <span class="button-arrow">→</span>
+            </span>
+
+            <span *ngIf="isLoading" class="loading-content">
+              <span class="loading-spinner"></span>
+
+              Signing in...
+            </span>
+          </button>
+        </form>
+
+        <!-- ========================================================= -->
+        <!-- LOGIN INFORMATION -->
+        <!-- ========================================================= -->
+
+        <div class="login-footer">
+          <span>Secure access to your support workspace</span>
         </div>
       </div>
-
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
-
-      <button type="submit" [disabled]="isLoading">
-        <span *ngIf="!isLoading"> Sign in </span>
-
-        <span *ngIf="isLoading"> Signing in... </span>
-      </button>
-    </form>
+    </section>
   </div>
+
+  <!-- =============================================================== -->
+  <!-- SHARED APPLICATION FOOTER -->
+  <!-- =============================================================== -->
+
+  <app-footer></app-footer>
 </div>

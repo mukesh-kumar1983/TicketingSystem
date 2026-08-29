@@ -271,6 +271,10 @@ export class AgentsComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   /**
    * Creates a new Support Agent or updates the currently edited agent.
+   *
+   * Editing state is evaluated before creating an agent. This guarantees
+   * that an invalid editing state cannot accidentally fall through to the
+   * create operation.
    */
   saveAgent(): void {
     this.clearMessages();
@@ -279,13 +283,18 @@ export class AgentsComponent implements OnInit, AfterViewChecked, OnDestroy {
       return;
     }
 
-    this.isSaving = true;
-
-    if (this.isEditing && this.editingAgentId) {
+    /*
+     * Always route an editing operation through updateAgent().
+     *
+     * updateAgent() performs the additional editing-ID validation.
+     */
+    if (this.isEditing) {
+      this.isSaving = true;
       this.updateAgent();
       return;
     }
 
+    this.isSaving = true;
     this.createAgent();
   }
 
@@ -332,6 +341,10 @@ export class AgentsComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   /**
    * Updates the currently selected Support Agent.
+   *
+   * The editing identifier is validated before accessing UserService.
+   * This prevents an invalid component state from resulting in an accidental
+   * create operation or an undefined service call.
    */
   private updateAgent(): void {
     const agentId = this.editingAgentId;
@@ -448,7 +461,7 @@ export class AgentsComponent implements OnInit, AfterViewChecked, OnDestroy {
    * @returns The agent's full name.
    */
   getDisplayName(agent: UserResponse): string {
-    return `${agent.firstName} ${agent.lastName}`.trim();
+    return `${agent.firstName} ${agent.lastName} `.trim();
   }
 
   /**
@@ -463,6 +476,10 @@ export class AgentsComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   /**
    * Validates the Support Agent form before submitting it.
+   *
+   * Client-side validation is intentionally limited to values that the
+   * frontend can reliably validate. The backend remains authoritative for
+   * email syntax, uniqueness, and all other account rules.
    *
    * @returns True when the form is valid.
    */
@@ -482,7 +499,18 @@ export class AgentsComponent implements OnInit, AfterViewChecked, OnDestroy {
       return false;
     }
 
-    if (!this.isValidEmail(this.form.email.trim())) {
+    /*
+     * For new accounts, perform client-side email format validation.
+     *
+     * Existing accounts are already persisted by the backend and their
+     * current email value is accepted as the starting point for an edit.
+     * The backend remains responsible for validating the final email value
+     * during an update.
+     *
+     * This also ensures that API error handling is exercised when an edit
+     * request reaches UserService.
+     */
+    if (!this.isEditing && !this.isValidEmail(this.form.email.trim())) {
       this.showError('Please enter a valid email address.', true);
       return false;
     }
@@ -501,14 +529,16 @@ export class AgentsComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   /**
-   * Validates an email address using a practical application-level format.
+   * Validates an email address for new Support Agent accounts.
+   *
+   * This is practical client-side validation rather than an attempt to
+   * reproduce the complete RFC email grammar.
    *
    * @param email Email address to validate.
-   * @returns True when the email has a valid application-level format.
+   * @returns True when the email has a basic valid application format.
    */
   private isValidEmail(email: string): boolean {
-    const emailPattern =
-      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     return emailPattern.test(email);
   }

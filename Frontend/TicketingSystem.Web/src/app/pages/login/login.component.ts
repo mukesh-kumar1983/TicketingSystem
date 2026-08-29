@@ -1,50 +1,97 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
 import { LoginRequest } from '../../models/authentication.models';
+import { FooterComponent } from '../../shared/components/footer/footer.component';
 
 /**
- * Provides the user interface used to authenticate against
- * the TicketingSystem API.
- */
+
+* ============================================================================
+* TicketingSystem - Login Component
+* ============================================================================
+*
+* Provides the user interface used to authenticate against the
+* TicketingSystem API.
+*
+* Responsibilities:
+*
+* * Validate login credentials.
+* * Submit credentials to AuthService.
+* * Display authentication errors.
+* * Display a loading state while authentication is in progress.
+* * Allow the user to show or hide the password.
+* * Provide accessible visual feedback for focused and invalid fields.
+* * Display the shared application footer.
+*
+* ============================================================================
+  */
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FooterComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
   /**
-   * Indicates whether a login request is currently being processed.
-   */
+
+  * Indicates whether a login request is currently being processed.
+    */
   isLoading = false;
 
   /**
-   * Contains an authentication error returned by the API or an
-   * HTTP/network error.
-   */
+  
+  * Controls whether the password is displayed as plain text.
+  *
+  * False:
+  * Password is hidden.
+  *
+  * True:
+  * Password is visible.
+    */
+  showPassword = false;
+
+  /**
+  
+  * Contains an authentication error returned by the API or an
+  * HTTP/network error.
+    */
   errorMessage = '';
 
   /**
-   * Reactive form containing the user's authentication credentials.
-   */
+  
+  * Contains the form control that currently has focus.
+  *
+  * This is used only for presentation purposes so the input wrapper can
+  * provide a consistent visual focus state.
+    */
+  focusedControl: FormControl<string> | null = null;
+
+  /**
+  
+  * Reactive form containing the user's authentication credentials.
+    */
   readonly loginForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-
     password: ['', [Validators.required]],
   });
 
   /**
-   * Creates an instance of LoginComponent.
-   *
-   * @param formBuilder Angular reactive-form builder.
-   * @param authService Application authentication service.
-   * @param router Angular router used after successful authentication.
-   */
+  
+  * Creates an instance of LoginComponent.
+  *
+  * @param formBuilder Angular reactive-form builder.
+  * @param authService Application authentication service.
+  * @param router Angular router used after successful authentication.
+    */
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
@@ -52,26 +99,38 @@ export class LoginComponent {
   ) {}
 
   /**
-   * Authenticates the user using the credentials entered into
-   * the login form.
-   */
+  
+  * Authenticates the user using the credentials entered into
+  * the login form.
+  *
+  * When the form is invalid, all controls are marked as touched so the
+  * appropriate validation messages are displayed.
+  *
+  * When authentication succeeds, AuthService stores the authentication
+  * information and the user is redirected to the dashboard.
+    */
   onSubmit(): void {
     /**
-     * Prevent submission when the form is invalid.
-     */
+  
+    * Prevent submission when the form is invalid.
+      */
     if (this.loginForm.invalid) {
       /**
-       * Mark all controls as touched so validation messages become
-       * visible to the user.
-       */
+  
+      * Mark all controls as touched so validation messages become
+      * visible to the user.
+        */
       this.loginForm.markAllAsTouched();
 
       return;
     }
 
     /**
-     * Clear any previous authentication error.
-     */
+
+
+      
+ * Clear any previous authentication error.
+ */
     this.errorMessage = '';
 
     /**
@@ -121,19 +180,31 @@ export class LoginComponent {
          */
         if (error.status === 401) {
           this.errorMessage = 'Invalid email address or password.';
+        } else if (error.status === 403) {
+          this.errorMessage =
+            'You do not have permission to access the application.';
+        } else if (error.status === 0) {
+          this.errorMessage =
+            'Unable to connect to the authentication server. Please check that the API is running and try again.';
         } else {
           this.errorMessage =
-            'Unable to connect to the authentication server. Please try again.';
+            error.error?.detail ??
+            error.error?.message ??
+            error.error?.title ??
+            'Unable to sign in. Please try again.';
         }
       },
-
-      /**
-       * Complete callback.
-       *
-       * We don't need to change the loading state here because
-       * successful and failed requests are handled above.
-       */
-      complete: () => {},
     });
+  }
+
+  /**
+  
+  * Toggles password visibility.
+  *
+  * This changes only the presentation of the password field and does not
+  * modify the value stored in the reactive form.
+    */
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }

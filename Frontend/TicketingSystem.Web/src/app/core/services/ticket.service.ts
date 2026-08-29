@@ -19,60 +19,65 @@ import {
 } from '../../models/ticket.models';
 
 /**
- * ============================================================================
- * TicketingSystem - Ticket Service
- * ============================================================================
- *
- * Provides the frontend with a centralized API abstraction for ticket
- * operations.
- *
- * Responsibilities:
- *
- * - Create tickets.
- * - Retrieve paginated tickets.
- * - Retrieve individual tickets.
- * - Retrieve complete ticket details.
- * - Add ticket comments.
- * - Retrieve ticket time entries.
- * - Record ticket work time.
- * - Assign tickets to support agents.
- * - Change ticket status.
- *
- * Authentication is handled by the application's HTTP interceptor.
- * ============================================================================
- */
+
+* ============================================================================
+* TicketingSystem - Ticket Service
+* ============================================================================
+*
+* Provides the frontend with a centralized API abstraction for ticket
+* operations.
+*
+* Responsibilities:
+*
+* * Create tickets.
+* * Retrieve paginated tickets.
+* * Retrieve individual tickets.
+* * Retrieve complete ticket details.
+* * Add ticket comments.
+* * Retrieve ticket time entries.
+* * Record ticket work time.
+* * Assign tickets to support agents.
+* * Change ticket status.
+*
+* Authentication is handled by the application's HTTP interceptor.
+* ============================================================================
+  */
 @Injectable({
   providedIn: 'root',
 })
 export class TicketService {
   /**
-   * Base URL for the ticket API.
-   */
+
+  * Base URL for the ticket API.
+    */
   private readonly apiUrl = `${environment.apiUrl}/Tickets`;
 
   /**
-   * Creates an instance of TicketService.
-   *
-   * @param http Angular HTTP client.
-   */
+  
+  * Creates an instance of TicketService.
+  *
+  * @param http Angular HTTP client.
+    */
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Creates a new support ticket.
-   *
-   * @param request Ticket creation information.
-   * @returns Newly created ticket.
-   */
+  
+  * Creates a new support ticket.
+  *
+  * @param request Ticket creation information.
+  * @returns Newly created ticket.
+    */
   createTicket(request: CreateTicketRequest): Observable<TicketResponse> {
     return this.http.post<TicketResponse>(this.apiUrl, request);
   }
 
   /**
-   * Retrieves a paginated collection of tickets.
-   *
-   * @param request Query and pagination options.
-   * @returns Paginated ticket collection.
-   */
+  
+  * Retrieves a paginated collection of tickets.
+  *
+  * @param request Query and pagination options.
+  * @returns Paginated ticket collection.
+    */
   getTickets(
     request: TicketQueryRequest = {},
   ): Observable<TicketQueryResponse> {
@@ -116,45 +121,35 @@ export class TicketService {
   }
 
   /**
-   * Retrieves a single ticket.
-   *
-   * @param id Ticket identifier.
-   * @returns Ticket information.
-   */
+  
+  * Retrieves a single ticket.
+  *
+  * @param id Ticket identifier.
+  * @returns Ticket information.
+    */
   getTicket(id: number): Observable<TicketResponse> {
     return this.http.get<TicketResponse>(`${this.apiUrl}/${id}`);
   }
 
   /**
-   * Retrieves complete ticket details.
-   *
-   * The endpoint includes:
-   *
-   * - Core ticket information.
-   * - Comments.
-   * - Activity timeline.
-   * - Recorded time entries.
-   *
-   * @param id Ticket identifier.
-   * @returns Complete ticket details.
-   */
+  
+  * Retrieves complete ticket details.
+  *
+  * @param id Ticket identifier.
+  * @returns Complete ticket details.
+    */
   getTicketDetails(id: number): Observable<TicketDetailsResponse> {
     return this.http.get<TicketDetailsResponse>(`${this.apiUrl}/${id}/details`);
   }
 
   /**
-   * Adds a comment to a ticket.
-   *
-   * The authenticated backend user becomes the author of the comment.
-   *
-   * API:
-   *
-   * POST /api/Tickets/{ticketId}/comments
-   *
-   * @param ticketId Ticket identifier.
-   * @param request Comment information.
-   * @returns Newly created comment.
-   */
+  
+  * Adds a comment to a ticket.
+  *
+  * @param ticketId Ticket identifier.
+  * @param request Comment information.
+  * @returns Newly created comment.
+    */
   addComment(
     ticketId: number,
     request: AddTicketCommentRequest,
@@ -166,19 +161,12 @@ export class TicketService {
   }
 
   /**
-   * Retrieves work-time entries for a ticket.
-   *
-   * API:
-   *
-   * GET /api/tickets/{ticketId}/time-entries
-   *
-   * The Ticket Details endpoint already supplies time entries, so this
-   * method is available for cases where the dedicated time-entry endpoint
-   * is required.
-   *
-   * @param ticketId Ticket identifier.
-   * @returns Recorded time entries.
-   */
+  
+  * Retrieves work-time entries for a ticket.
+  *
+  * @param ticketId Ticket identifier.
+  * @returns Recorded time entries.
+    */
   getTimeEntries(ticketId: number): Observable<TicketTimeEntryResponse[]> {
     return this.http.get<TicketTimeEntryResponse[]>(
       `${environment.apiUrl}/tickets/${ticketId}/time-entries`,
@@ -186,16 +174,13 @@ export class TicketService {
   }
 
   /**
-   * Records work performed against a ticket.
-   *
-   * API:
-   *
-   * POST /api/tickets/{ticketId}/time-entries
-   *
-   * @param ticketId Ticket identifier.
-   * @param request Work-entry information.
-   * @returns Newly created time entry.
-   */
+  
+  * Records work performed against a ticket.
+  *
+  * @param ticketId Ticket identifier.
+  * @param request Work-entry information.
+  * @returns Newly created time entry.
+    */
   createTimeEntry(
     ticketId: number,
     request: CreateTimeEntryRequest,
@@ -207,12 +192,13 @@ export class TicketService {
   }
 
   /**
-   * Assigns a ticket to a support agent.
-   *
-   * @param id Ticket identifier.
-   * @param request Assignment request.
-   * @returns Updated ticket.
-   */
+  
+  * Assigns a ticket to a support agent.
+  *
+  * @param id Ticket identifier.
+  * @param request Assignment request.
+  * @returns Updated ticket.
+    */
   assignTicket(
     id: number,
     request: AssignTicketRequest,
@@ -224,12 +210,13 @@ export class TicketService {
   }
 
   /**
-   * Changes the workflow status of a ticket.
-   *
-   * @param id Ticket identifier.
-   * @param request Status update request.
-   * @returns Updated ticket.
-   */
+  
+  * Changes the workflow status of a ticket.
+  *
+  * @param id Ticket identifier.
+  * @param request Status update request.
+  * @returns Updated ticket.
+    */
   updateTicketStatus(
     id: number,
     request: UpdateTicketStatusRequest,

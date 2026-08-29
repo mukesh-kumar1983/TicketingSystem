@@ -1,14 +1,22 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
+/**
+
+============================================================================
+TicketingSystem - TypeScript Test Configuration
+============================================================================
+TypeScript configuration used when compiling Angular unit-test files.
+The TicketingSystem Angular application uses:
+Jasmine for unit-test definitions.
+Karma as the browser test runner.
+The Jasmine type definitions are explicitly included below so TypeScript
+recognizes the Jasmine global functions used by *.spec.ts files.
+============================================================================
+*/
+
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": [
-      "jasmine"
-    ]
+    "types": ["jasmine"]
   },
-  "include": [
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
+  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
 }

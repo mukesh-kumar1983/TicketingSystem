@@ -15,8 +15,7 @@
         <h1 *ngIf="ticket">#{{ ticket.id }} — {{ ticket.title }}</h1>
 
         <p *ngIf="ticket">
-          Complete ticket information, assignment, workflow activity and
-          communication.
+          Complete ticket information, communication, activity and work history.
         </p>
       </div>
     </div>
@@ -221,7 +220,7 @@
               </div>
 
               <p>
-                {{ comment.content || comment.text || "No comment content." }}
+                {{ comment.content || "No comment content." }}
               </p>
             </div>
           </article>
@@ -311,10 +310,6 @@
           </div>
 
           <div class="time-entry-form-grid">
-            <!-- =================================================== -->
-            <!-- WORK DATE -->
-            <!-- =================================================== -->
-
             <div class="time-entry-field">
               <label for="time-entry-work-date">
                 Work Date
@@ -329,10 +324,6 @@
                 aria-label="Work date"
               />
             </div>
-
-            <!-- =================================================== -->
-            <!-- DURATION -->
-            <!-- =================================================== -->
 
             <div class="time-entry-field">
               <label for="time-entry-duration">
@@ -356,10 +347,6 @@
               </span>
             </div>
           </div>
-
-          <!-- ===================================================== -->
-          <!-- DESCRIPTION -->
-          <!-- ===================================================== -->
 
           <div class="time-entry-field description-field">
             <label for="time-entry-description">
@@ -387,10 +374,6 @@
               </span>
             </div>
           </div>
-
-          <!-- ===================================================== -->
-          <!-- ACTION -->
-          <!-- ===================================================== -->
 
           <div class="time-entry-composer-footer">
             <span class="time-entry-limit"> Maximum duration: 24 hours. </span>
@@ -472,8 +455,14 @@
       <!-- ========================================================= -->
       <!-- ASSIGNMENT -->
       <!-- ========================================================= -->
+      <!--
+        Customers are intentionally not shown this section.
 
-      <section class="detail-card">
+        Backend authorization remains responsible for enforcing the rule.
+        This frontend condition simply provides the correct user experience.
+      -->
+
+      <section *ngIf="!isCustomer" class="detail-card">
         <div class="card-header">
           <div>
             <div class="section-eyebrow">OWNERSHIP</div>
@@ -483,7 +472,7 @@
         </div>
 
         <div class="side-card-body">
-          <label for="ticket-agent"> Support Agent </label>
+          <label for="ticket-agent">Support Agent</label>
 
           <select
             id="ticket-agent"
@@ -514,7 +503,14 @@
             {{ isAssigning ? "Assigning..." : "Assign Ticket" }}
           </button>
 
-          <div *ngIf="assignmentMessage" class="operation-message">
+          <div
+            *ngIf="assignmentMessage"
+            class="operation-message"
+            [ngClass]="{
+              'operation-success': assignmentMessage.includes('successfully'),
+              'operation-error': !assignmentMessage.includes('successfully'),
+            }"
+          >
             {{ assignmentMessage }}
           </div>
 
@@ -531,8 +527,15 @@
       <!-- ========================================================= -->
       <!-- STATUS -->
       <!-- ========================================================= -->
+      <!--
+        Customers are intentionally not shown this section.
 
-      <section class="detail-card">
+        Backend authorization remains responsible for enforcing the rule.
+        The frontend hides the control because Customers should not be offered
+        an operation they are not allowed to perform.
+      -->
+
+      <section *ngIf="!isCustomer" class="detail-card">
         <div class="card-header">
           <div>
             <div class="section-eyebrow">WORKFLOW</div>
@@ -542,7 +545,7 @@
         </div>
 
         <div class="side-card-body">
-          <label for="ticket-status"> Status </label>
+          <label for="ticket-status">Status</label>
 
           <select
             id="ticket-status"
@@ -571,7 +574,14 @@
             {{ isUpdatingStatus ? "Updating..." : "Update Status" }}
           </button>
 
-          <div *ngIf="statusMessage" class="operation-message">
+          <div
+            *ngIf="statusMessage"
+            class="operation-message"
+            [ngClass]="{
+              'operation-success': statusMessage.includes('successfully'),
+              'operation-error': !statusMessage.includes('successfully'),
+            }"
+          >
             {{ statusMessage }}
           </div>
         </div>

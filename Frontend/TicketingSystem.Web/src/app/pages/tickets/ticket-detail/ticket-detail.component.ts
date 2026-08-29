@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { catchError } from 'rxjs';
 
+import { AuthService } from '../../../core/services/auth.service';
 import { TicketService } from '../../../core/services/ticket.service';
 import { UserService } from '../../../core/services/user.service';
 
@@ -24,39 +24,54 @@ import {
 import { UserResponse } from '../../../models/user.models';
 
 /**
- * ============================================================================
- * TicketingSystem - Ticket Detail Component
- * ============================================================================
- *
- * Displays the complete details of a selected support ticket.
- *
- * Responsibilities:
- *
- * - Read the ticket ID from the route.
- * - Load the complete ticket-details envelope.
- * - Extract the actual TicketResponse from response.ticket.
- * - Display comments, activity and time entries.
- * - Add comments to the ticket.
- * - Record work time against the ticket.
- * - Load available support agents.
- * - Assign the ticket to a support agent.
- * - Change ticket workflow status.
- * - Navigate back to the ticket list.
- *
- * Existing ticket functionality is intentionally preserved.
- *
- * API endpoints:
- *
- * GET   /api/Tickets/{id}/details
- * GET   /api/Tickets/{id}
- * POST  /api/Tickets/{id}/comments
- * PATCH /api/Tickets/{id}/assign
- * PATCH /api/Tickets/{id}/status
- * GET   /api/tickets/{ticketId}/time-entries
- * POST  /api/tickets/{ticketId}/time-entries
- * GET   /api/Users/agents
- * ============================================================================
- */
+
+* ============================================================================
+* TicketingSystem - Ticket Detail Component
+* ============================================================================
+*
+* Displays the complete details of a selected support ticket.
+*
+* Responsibilities:
+*
+* * Read the ticket ID from the route.
+* * Load the complete ticket-details response.
+* * Display ticket information.
+* * Display comments.
+* * Display activity history.
+* * Display time entries.
+* * Add comments to the ticket.
+* * Record work time against the ticket.
+* * Load available support agents for authorized users.
+* * Assign the ticket to a support agent for authorized users.
+* * Change ticket workflow status for authorized users.
+* * Navigate back to the ticket list.
+* * Apply role-based UI visibility.
+*
+* ROLE-BASED UI
+* ============================================================================
+*
+* Customers:
+*
+* * Can view their ticket.
+* * Can add comments.
+* * Can record work time when permitted by the backend.
+* * Can view activity.
+* * Cannot assign tickets.
+* * Cannot change ticket status.
+*
+* Administrators / authorized staff:
+*
+* * Can use the assignment and status controls according to backend
+* authorization rules.
+*
+* IMPORTANT:
+*
+* Hiding controls in the frontend is only a user-experience measure.
+*
+* The backend remains the authoritative security boundary and must continue
+* enforcing all role and permission rules.
+* ============================================================================
+  */
 @Component({
   selector: 'app-ticket-detail',
   standalone: true,
@@ -66,118 +81,149 @@ import { UserResponse } from '../../../models/user.models';
 })
 export class TicketDetailComponent implements OnInit {
   /**
-   * Currently loaded ticket.
-   */
+
+  * Currently loaded ticket.
+    */
   ticket: TicketResponse | null = null;
 
   /**
-   * Complete details response.
-   */
-  private ticketDetails: TicketDetailsResponse | null = null;
+  
+  * Comments returned by the backend.
+    */
+  comments: TicketCommentResponse[] = [];
 
   /**
-   * Available support agents.
-   */
+  
+  * Activity entries returned by the backend.
+    */
+  activities: TicketActivityResponse[] = [];
+
+  /**
+  
+  * Recorded work-time entries returned by the backend.
+    */
+  timeEntries: TicketTimeEntryResponse[] = [];
+
+  /**
+  
+  * Available support agents.
+    */
   agents: UserResponse[] = [];
 
   /**
-   * Selected support-agent identifier.
-   */
+  
+  * Selected support-agent identifier.
+    */
   selectedAgentId = '';
 
   /**
-   * Selected workflow status.
-   */
+  
+  * Selected workflow status.
+    */
   selectedStatus: TicketStatus | null = null;
 
   /**
-   * New comment entered by the current user.
-   */
+  
+  * New comment entered by the current user.
+    */
   newComment = '';
 
   /**
-   * Indicates that the comment is currently being submitted.
-   */
+  
+  * Indicates that a comment is currently being submitted.
+    */
   isAddingComment = false;
 
   /**
-   * Message displayed after a comment operation.
-   */
+  
+  * Message displayed after a comment operation.
+    */
   commentMessage = '';
 
   /**
-   * Work date selected in the Log Time form.
-   *
-   * HTML date inputs use the YYYY-MM-DD format.
-   */
+  
+  * Work date selected in the Log Time form.
+    */
   timeEntryWorkDate = '';
 
   /**
-   * Duration entered in the Log Time form.
-   *
-   * The UI accepts HH:mm and converts it to HH:mm:ss before sending
-   * the request to ASP.NET Core.
-   */
+  
+  * Duration entered in the Log Time form.
+  *
+  * The UI accepts HH:mm and converts it to HH:mm:ss before submitting.
+    */
   timeEntryDuration = '';
 
   /**
-   * Work description entered in the Log Time form.
-   */
+  
+  * Work description entered in the Log Time form.
+    */
   timeEntryDescription = '';
 
   /**
-   * Indicates that a time-entry operation is currently running.
-   */
+  
+  * Indicates that a time-entry operation is currently running.
+    */
   isAddingTimeEntry = false;
 
   /**
-   * Message displayed after a time-entry operation.
-   */
+  
+  * Message displayed after a time-entry operation.
+    */
   timeEntryMessage = '';
 
   /**
-   * Indicates that the ticket is loading.
-   */
+  
+  * Indicates that the ticket is loading.
+    */
   isLoading = false;
 
   /**
-   * Indicates that the support-agent collection is loading.
-   */
+  
+  * Indicates that support agents are loading.
+    */
   isLoadingAgents = false;
 
   /**
-   * Indicates that an assignment operation is running.
-   */
+  
+  * Indicates that an assignment operation is running.
+    */
   isAssigning = false;
 
   /**
-   * Indicates that a status update is running.
-   */
+  
+  * Indicates that a status update is running.
+    */
   isUpdatingStatus = false;
 
   /**
-   * Error displayed when the ticket cannot be loaded.
-   */
+  
+  * Error displayed when the ticket cannot be loaded.
+    */
   errorMessage = '';
 
   /**
-   * Assignment operation message.
-   */
+  
+  * Assignment operation message.
+    */
   assignmentMessage = '';
 
   /**
-   * Status update message.
-   */
+  
+  * Status update message.
+    */
   statusMessage = '';
 
   /**
-   * Route ticket identifier.
-   */
+  
+  * Route ticket identifier.
+    */
   private ticketId = 0;
 
   /**
-   * Available workflow statuses.
-   */
+  
+  * Available workflow statuses.
+    */
   readonly ticketStatuses = [
     {
       value: TicketStatus.Open,
@@ -198,50 +244,72 @@ export class TicketDetailComponent implements OnInit {
   ];
 
   /**
-   * Creates an instance of TicketDetailComponent.
-   *
-   * @param route Activated route containing the ticket identifier.
-   * @param router Angular router.
-   * @param ticketService Ticket API service.
-   * @param userService User-management API service.
-   */
+  
+  * Creates the ticket-detail component.
+  *
+  * @param route Activated route containing the ticket identifier.
+  * @param router Angular router.
+  * @param authService Authentication service used for role information.
+  * @param ticketService Ticket API service.
+  * @param userService User-management API service.
+    */
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
+    private readonly authService: AuthService,
     private readonly ticketService: TicketService,
     private readonly userService: UserService,
   ) {}
 
   /**
-   * Initializes the ticket-detail page.
-   */
-  ngOnInit(): void {
-    this.initializeTimeEntryForm();
-    this.loadTicketFromRoute();
-    this.loadAgents();
+  
+  * Determines whether the currently authenticated user is a Customer.
+  *
+  * This property is consumed directly by the Angular template.
+  *
+  * @returns True when the current user has the Customer role.
+    */
+  get isCustomer(): boolean {
+    return this.authService.isCustomer();
   }
 
   /**
-   * Initializes the Log Time form with sensible defaults.
-   */
+  
+  * Initializes the ticket-detail page.
+    */
+  ngOnInit(): void {
+    this.initializeTimeEntryForm();
+    this.loadTicketFromRoute();
+
+    /**
+
+
+      
+ * Customers do not need the agent list because they cannot assign tickets.
+ *
+ * Avoiding the API call also prevents unnecessary 403 responses.
+ */
+    if (!this.isCustomer) {
+      this.loadAgents();
+    }
+  }
+
+  /**
+  
+  * Initializes the Log Time form.
+    */
   private initializeTimeEntryForm(): void {
-    const today = new Date();
-
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-
-    this.timeEntryWorkDate = `${year}-${month}-${day}`;
+    this.timeEntryWorkDate = this.getTodayDate();
     this.timeEntryDuration = '';
     this.timeEntryDescription = '';
   }
 
   /**
-   * Reads and validates the ticket identifier from the URL.
-   */
+  
+  * Reads and validates the ticket identifier from the route.
+    */
   private loadTicketFromRoute(): void {
     const rawId = this.route.snapshot.paramMap.get('id');
-
     const parsedId = Number(rawId);
 
     if (!rawId || !Number.isInteger(parsedId) || parsedId <= 0) {
@@ -250,112 +318,91 @@ export class TicketDetailComponent implements OnInit {
     }
 
     this.ticketId = parsedId;
-
     this.loadTicket();
   }
 
   /**
-   * Loads the complete ticket details.
-   */
+  
+  * Loads complete ticket details.
+  *
+  * The backend details endpoint is the authoritative source for this page.
+    */
   loadTicket(): void {
     if (!this.ticketId) {
       return;
     }
 
     this.isLoading = true;
+
     this.errorMessage = '';
-    this.assignmentMessage = '';
-    this.statusMessage = '';
-    this.commentMessage = '';
 
-    this.ticketService
-      .getTicketDetails(this.ticketId)
-      .pipe(
-        catchError(() =>
-          this.ticketService.getTicket(this.ticketId).pipe(
-            catchError((error) => {
-              throw error;
-            }),
-          ),
-        ),
-      )
-      .subscribe({
-        next: (response: TicketDetailsResponse | TicketResponse) => {
-          if (this.isTicketDetailsResponse(response)) {
-            this.ticketDetails = response;
-            this.ticket = response.ticket;
+    this.ticketService.getTicketDetails(this.ticketId).subscribe({
+      next: (response: TicketDetailsResponse) => {
+        this.applyTicketDetails(response);
+        this.isLoading = false;
+      },
 
-            this.selectedAgentId = response.ticket.assignedAgentId ?? '';
+      error: (error: {
+        status?: number;
+        error?: {
+          title?: string;
+          detail?: string;
+          message?: string;
+        };
+        message?: string;
+      }) => {
+        this.isLoading = false;
 
-            this.selectedStatus = response.ticket.status;
-          } else {
-            this.ticketDetails = null;
-            this.ticket = response;
+        this.ticket = null;
+        this.comments = [];
+        this.activities = [];
+        this.timeEntries = [];
 
-            this.selectedAgentId = response.assignedAgentId ?? '';
-
-            this.selectedStatus = response.status;
-          }
-
-          this.isLoading = false;
-        },
-
-        error: (error: {
-          status?: number;
-          error?: {
-            title?: string;
-            detail?: string;
-            message?: string;
-          };
-        }) => {
-          this.isLoading = false;
-
-          if (error.status === 401) {
-            this.errorMessage =
-              'Your session has expired. Please sign in again.';
-            return;
-          }
-
-          if (error.status === 403) {
-            this.errorMessage =
-              'You do not have permission to view this ticket.';
-            return;
-          }
-
-          if (error.status === 404) {
-            this.errorMessage = 'The requested ticket could not be found.';
-            return;
-          }
-
-          this.errorMessage =
-            error.error?.detail ??
-            error.error?.message ??
-            error.error?.title ??
-            'Unable to load the requested ticket.';
-        },
-      });
+        this.errorMessage = this.getErrorMessage(
+          error,
+          'Unable to load the requested ticket.',
+        );
+      },
+    });
   }
 
   /**
-   * Determines whether the API response is a TicketDetailsResponse.
-   *
-   * @param response API response.
-   * @returns True when the response contains a ticket property.
-   */
-  private isTicketDetailsResponse(
-    response: TicketDetailsResponse | TicketResponse,
-  ): response is TicketDetailsResponse {
-    return (
-      response !== null && typeof response === 'object' && 'ticket' in response
-    );
+  
+  * Applies the complete backend ticket-details response to component state.
+  *
+  * @param response Complete ticket-details response.
+    */
+  private applyTicketDetails(response: TicketDetailsResponse): void {
+    if (!response || !response.ticket) {
+      this.ticket = null;
+      this.comments = [];
+      this.activities = [];
+      this.timeEntries = [];
+      return;
+    }
+
+    this.ticket = response.ticket;
+
+    this.comments = Array.isArray(response.comments)
+      ? [...response.comments]
+      : [];
+
+    this.activities = Array.isArray(response.activities)
+      ? [...response.activities]
+      : [];
+
+    this.timeEntries = Array.isArray(response.timeEntries)
+      ? [...response.timeEntries]
+      : [];
+
+    this.selectedAgentId = response.ticket.assignedAgentId ?? '';
+    this.selectedStatus = response.ticket.status;
   }
 
   /**
-   * Adds the comment currently entered in the comment composer.
-   *
-   * The authenticated backend user is automatically recorded as the
-   * comment author.
-   */
+  
+  * Adds a comment to the currently loaded ticket.
+    */
   addComment(): void {
     if (!this.ticket || this.isAddingComment) {
       return;
@@ -384,17 +431,15 @@ export class TicketDetailComponent implements OnInit {
     this.commentMessage = '';
 
     this.ticketService.addComment(ticketId, request).subscribe({
-      next: (comment: TicketCommentResponse) => {
-        if (this.ticketDetails) {
-          this.ticketDetails = {
-            ...this.ticketDetails,
-            comments: [...this.ticketDetails.comments, comment],
-          };
+      next: (createdComment: TicketCommentResponse) => {
+        if (createdComment) {
+          this.comments = [...this.comments, createdComment];
         }
 
         this.newComment = '';
         this.commentMessage = 'Comment added successfully.';
-        this.isAddingComment = false;
+
+        this.refreshTicketDetailsAfterComment();
       },
 
       error: (error: {
@@ -404,40 +449,47 @@ export class TicketDetailComponent implements OnInit {
           detail?: string;
           message?: string;
         };
+        message?: string;
       }) => {
-        if (error.status === 400) {
-          this.commentMessage =
-            error.error?.detail ??
-            error.error?.message ??
-            error.error?.title ??
-            'The comment could not be added.';
-        } else if (error.status === 401) {
-          this.commentMessage =
-            'Your session has expired. Please sign in again.';
-        } else if (error.status === 403) {
-          this.commentMessage =
-            'You do not have permission to comment on this ticket.';
-        } else if (error.status === 404) {
-          this.commentMessage = 'The requested ticket could not be found.';
-        } else {
-          this.commentMessage =
-            error.error?.detail ??
-            error.error?.message ??
-            error.error?.title ??
-            'Unable to add the comment. Please try again.';
-        }
-
         this.isAddingComment = false;
+
+        this.commentMessage = this.getErrorMessage(
+          error,
+          'Unable to add the comment. Please try again.',
+        );
       },
     });
   }
 
   /**
-   * Records work performed against the currently loaded ticket.
-   *
-   * The backend expects a .NET TimeSpan. The UI accepts HH:mm and this
-   * method converts it to HH:mm:ss before submitting the request.
-   */
+  
+  * Refreshes ticket details after a successful comment operation.
+    */
+  private refreshTicketDetailsAfterComment(): void {
+    if (!this.ticketId) {
+      this.isAddingComment = false;
+      return;
+    }
+
+    this.ticketService.getTicketDetails(this.ticketId).subscribe({
+      next: (response: TicketDetailsResponse) => {
+        this.applyTicketDetails(response);
+
+        this.isAddingComment = false;
+        this.commentMessage = 'Comment added successfully.';
+      },
+
+      error: () => {
+        this.isAddingComment = false;
+        this.commentMessage = 'Comment added successfully.';
+      },
+    });
+  }
+
+  /**
+  
+  * Records work performed against the currently loaded ticket.
+    */
   addTimeEntry(): void {
     if (!this.ticket || this.isAddingTimeEntry) {
       return;
@@ -492,26 +544,14 @@ export class TicketDetailComponent implements OnInit {
 
     this.ticketService.createTimeEntry(ticketId, request).subscribe({
       next: (entry: TicketTimeEntryResponse) => {
-        if (this.ticketDetails) {
-          this.ticketDetails = {
-            ...this.ticketDetails,
-            timeEntries: [...this.ticketDetails.timeEntries, entry],
-          };
-        }
+        this.timeEntries = [...this.timeEntries, entry];
 
         this.timeEntryWorkDate = this.getTodayDate();
         this.timeEntryDuration = '';
         this.timeEntryDescription = '';
 
         this.timeEntryMessage = 'Work time recorded successfully.';
-        this.isAddingTimeEntry = false;
 
-        /**
-         * The CreateTimeEntry API response does not contain the recalculated
-         * ticket TotalWorkTime. Reloading the ticket details ensures that
-         * the summary and total work time remain synchronized with the
-         * database after the new entry has been persisted.
-         */
         this.refreshTicketDetailsAfterTimeEntry();
       },
 
@@ -522,64 +562,37 @@ export class TicketDetailComponent implements OnInit {
           detail?: string;
           message?: string;
         };
+        message?: string;
       }) => {
-        if (error.status === 400) {
-          this.timeEntryMessage =
-            error.error?.detail ??
-            error.error?.message ??
-            error.error?.title ??
-            'The work entry could not be recorded.';
-        } else if (error.status === 401) {
-          this.timeEntryMessage =
-            'Your session has expired. Please sign in again.';
-        } else if (error.status === 403) {
-          this.timeEntryMessage =
-            'You do not have permission to record work against this ticket.';
-        } else if (error.status === 404) {
-          this.timeEntryMessage = 'The requested ticket could not be found.';
-        } else {
-          this.timeEntryMessage =
-            error.error?.detail ??
-            error.error?.message ??
-            error.error?.title ??
-            'Unable to record work time. Please try again.';
-        }
-
         this.isAddingTimeEntry = false;
+
+        this.timeEntryMessage = this.getErrorMessage(
+          error,
+          'Unable to record work time. Please try again.',
+        );
       },
     });
   }
 
   /**
-   * Refreshes the ticket details after recording work.
-   *
-   * This keeps the total work-time summary and activity timeline
-   * synchronized with the backend.
-   */
+  
+  * Refreshes ticket details after recording work.
+    */
   private refreshTicketDetailsAfterTimeEntry(): void {
     if (!this.ticketId) {
+      this.isAddingTimeEntry = false;
       return;
     }
 
     this.ticketService.getTicketDetails(this.ticketId).subscribe({
       next: (response: TicketDetailsResponse) => {
-        this.ticketDetails = response;
-        this.ticket = response.ticket;
-
-        this.selectedAgentId = response.ticket.assignedAgentId ?? '';
-        this.selectedStatus = response.ticket.status;
+        this.applyTicketDetails(response);
 
         this.isAddingTimeEntry = false;
         this.timeEntryMessage = 'Work time recorded successfully.';
       },
 
       error: () => {
-        /**
-         * The original POST already succeeded. Therefore a refresh failure
-         * must not turn the successful work-entry operation into an error.
-         *
-         * The newly created entry has already been added locally above.
-         */
         this.isAddingTimeEntry = false;
         this.timeEntryMessage = 'Work time recorded successfully.';
       },
@@ -587,16 +600,12 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Validates a duration entered as HH:mm.
-   *
-   * Supported range:
-   *
-   * - 00:01
-   * - through 24:00
-   *
-   * @param duration Duration entered by the user.
-   * @returns True when the duration is valid.
-   */
+  
+  * Validates a duration entered as HH:mm.
+  *
+  * @param duration Duration entered by the user.
+  * @returns True when the duration is valid.
+    */
   private isValidDuration(duration: string): boolean {
     const match = /^(\d{1,2}):([0-5]\d)$/.exec(duration);
 
@@ -623,16 +632,17 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Converts a frontend HH:mm duration into the HH:mm:ss format expected
-   * by the ASP.NET Core TimeSpan JSON converter.
-   *
-   * @param duration Frontend duration.
-   * @returns API-compatible duration.
-   */
+  
+  * Converts HH:mm to ASP.NET Core TimeSpan-compatible HH:mm:ss.
+  *
+  * @param duration Frontend duration.
+  * @returns API-compatible duration.
+    */
   private toApiDuration(duration: string): string {
     const parts = duration.split(':');
 
     const hours = Number(parts[0]);
+
     const minutes = Number(parts[1]);
 
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
@@ -642,24 +652,52 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Gets today's local date in the format required by an HTML date input.
-   *
-   * @returns Current local date in YYYY-MM-DD format.
-   */
+  
+  * Gets today's local date in YYYY-MM-DD format.
+  *
+  * IMPORTANT:
+  *
+  * The previous implementation accidentally inserted spaces around the
+  * separators. That produced values such as:
+  *
+  * 
+    2026 -08 -29
+    
+  *
+  * instead of:
+  *
+  * 
+    2026-08-29
+    
+  *
+  * The corrected format is compatible with the HTML date input and backend
+  * date parsing.
+  *
+  * @returns Current local date in YYYY-MM-DD format.
+    */
   private getTodayDate(): string {
     const today = new Date();
 
     const year = today.getFullYear();
+
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
 
-    return `${year}-${month}-${day}`;
+    return `${year} -${month} -${day} `;
   }
 
   /**
-   * Loads the available support agents.
-   */
+  
+  * Loads available support agents.
+  *
+  * This method is only called for users who are not Customers.
+    */
   loadAgents(): void {
+    if (this.isCustomer) {
+      this.agents = [];
+      return;
+    }
+
     this.isLoadingAgents = true;
 
     this.userService.getAgents().subscribe({
@@ -668,17 +706,49 @@ export class TicketDetailComponent implements OnInit {
         this.isLoadingAgents = false;
       },
 
-      error: () => {
+      error: (error: {
+        status?: number;
+        error?: {
+          title?: string;
+          detail?: string;
+          message?: string;
+        };
+        message?: string;
+      }) => {
         this.agents = [];
         this.isLoadingAgents = false;
+
+        /**
+         * Assignment controls are hidden for Customers, so an agent-loading
+         * failure is only relevant to authorized staff.
+         *
+         * The error is intentionally kept in the assignment message instead
+         * of disrupting the entire ticket details page.
+         */
+        if (!this.isCustomer) {
+          this.assignmentMessage = this.getErrorMessage(
+            error,
+            'Unable to load support agents.',
+          );
+        }
       },
     });
   }
 
   /**
-   * Assigns the ticket to the selected support agent.
-   */
+  
+  * Assigns the ticket to the selected support agent.
+  *
+  * The frontend prevents Customers from reaching this operation.
+  * The backend remains responsible for enforcing authorization.
+    */
   assignTicket(): void {
+    if (this.isCustomer) {
+      this.assignmentMessage =
+        'Customers do not have permission to assign tickets.';
+      return;
+    }
+
     if (!this.ticket || !this.selectedAgentId) {
       return;
     }
@@ -720,26 +790,12 @@ export class TicketDetailComponent implements OnInit {
             detail?: string;
             message?: string;
           };
+          message?: string;
         }) => {
-          if (error.status === 400) {
-            this.assignmentMessage =
-              error.error?.detail ??
-              error.error?.message ??
-              error.error?.title ??
-              'The selected support agent could not be assigned to this ticket.';
-          } else if (error.status === 404) {
-            this.assignmentMessage =
-              'The ticket or selected support agent could not be found.';
-          } else if (error.status === 403) {
-            this.assignmentMessage =
-              'You do not have permission to assign this ticket.';
-          } else {
-            this.assignmentMessage =
-              error.error?.detail ??
-              error.error?.message ??
-              error.error?.title ??
-              'Unable to assign the ticket. Please try again.';
-          }
+          this.assignmentMessage = this.getErrorMessage(
+            error,
+            'Unable to assign the ticket. Please try again.',
+          );
 
           this.isAssigning = false;
         },
@@ -747,9 +803,19 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Changes the ticket workflow status.
-   */
+  
+  * Changes the ticket workflow status.
+  *
+  * The frontend prevents Customers from reaching this operation.
+  * The backend remains responsible for enforcing authorization.
+    */
   updateStatus(): void {
+    if (this.isCustomer) {
+      this.statusMessage =
+        'Customers do not have permission to change ticket status.';
+      return;
+    }
+
     if (!this.ticket || this.selectedStatus === null) {
       return;
     }
@@ -782,9 +848,7 @@ export class TicketDetailComponent implements OnInit {
           };
 
           this.selectedStatus = updatedTicket.status;
-
           this.statusMessage = 'Ticket status updated successfully.';
-
           this.isUpdatingStatus = false;
         },
 
@@ -795,12 +859,12 @@ export class TicketDetailComponent implements OnInit {
             detail?: string;
             message?: string;
           };
+          message?: string;
         }) => {
-          this.statusMessage =
-            error.error?.detail ??
-            error.error?.message ??
-            error.error?.title ??
-            'Unable to update the ticket status. Please try again.';
+          this.statusMessage = this.getErrorMessage(
+            error,
+            'Unable to update the ticket status. Please try again.',
+          );
 
           this.isUpdatingStatus = false;
         },
@@ -808,38 +872,109 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Navigates back to the ticket list.
-   */
+  
+  * Extracts the most useful error message from an Angular HTTP error.
+  *
+  * Handles:
+  *
+  * * ASP.NET Core ProblemDetails.detail
+  * * ProblemDetails.message
+  * * ProblemDetails.title
+  * * Angular HttpErrorResponse.message
+  * * HTTP 401
+  * * HTTP 403
+  * * HTTP 404
+  * * Generic fallback errors
+  *
+  * @param error HTTP error returned by Angular.
+  * @param fallback Safe fallback message.
+  * @returns User-friendly error message.
+    */
+  private getErrorMessage(
+    error: {
+      status?: number;
+      error?: {
+        title?: string;
+        detail?: string;
+        message?: string;
+      };
+      message?: string;
+    },
+    fallback: string,
+  ): string {
+    if (error.status === 401) {
+      return (
+        error.error?.detail ??
+        error.error?.message ??
+        error.error?.title ??
+        'Your session has expired. Please sign in again.'
+      );
+    }
+
+    if (error.status === 403) {
+      return (
+        error.error?.detail ??
+        error.error?.message ??
+        error.error?.title ??
+        'You do not have permission to perform this operation.'
+      );
+    }
+
+    if (error.status === 404) {
+      return (
+        error.error?.detail ??
+        error.error?.message ??
+        error.error?.title ??
+        'The requested resource could not be found.'
+      );
+    }
+
+    return (
+      error.error?.detail ??
+      error.error?.message ??
+      error.error?.title ??
+      error.message ??
+      fallback
+    );
+  }
+
+  /**
+  
+  * Navigates back to the ticket list.
+    */
   goBack(): void {
     this.router.navigate(['/tickets']);
   }
 
   /**
-   * Converts a status to a display label.
-   *
-   * @param status Ticket status.
-   * @returns Display label.
-   */
+  
+  * Converts a status into its display label.
+  *
+  * @param status Ticket status.
+  * @returns Display label.
+    */
   getStatusLabel(status: TicketStatus): string {
     return getTicketStatusLabel(status);
   }
 
   /**
-   * Converts a priority to a display label.
-   *
-   * @param priority Ticket priority.
-   * @returns Display label.
-   */
+  
+  * Converts a priority into its display label.
+  *
+  * @param priority Ticket priority.
+  * @returns Display label.
+    */
   getPriorityLabel(priority: TicketPriority): string {
     return getTicketPriorityLabel(priority);
   }
 
   /**
-   * Gets a CSS class for a ticket status.
-   *
-   * @param status Ticket status.
-   * @returns CSS class.
-   */
+  
+  * Gets a CSS class for a ticket status.
+  *
+  * @param status Ticket status.
+  * @returns CSS class.
+    */
   getStatusClass(status: TicketStatus): string {
     switch (status) {
       case TicketStatus.Open:
@@ -860,11 +995,12 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Gets a CSS class for a ticket priority.
-   *
-   * @param priority Ticket priority.
-   * @returns CSS class.
-   */
+  
+  * Gets a CSS class for a ticket priority.
+  *
+  * @param priority Ticket priority.
+  * @returns CSS class.
+    */
   getPriorityClass(priority: TicketPriority): string {
     switch (priority) {
       case TicketPriority.Low:
@@ -885,11 +1021,12 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Formats an API date.
-   *
-   * @param value ISO date-time.
-   * @returns Formatted date.
-   */
+  
+  * Formats an API date.
+  *
+  * @param value ISO date-time.
+  * @returns Formatted date.
+    */
   formatDate(value?: string): string {
     if (!value) {
       return '-';
@@ -911,11 +1048,12 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Formats a work date without introducing an unwanted timezone shift.
-   *
-   * @param value Work date returned by the API.
-   * @returns Formatted work date.
-   */
+  
+  * Formats a work date without introducing an unwanted timezone shift.
+  *
+  * @param value Work date returned by the API.
+  * @returns Formatted work date.
+    */
   formatWorkDate(value?: string): string {
     if (!value) {
       return '-';
@@ -955,17 +1093,18 @@ export class TicketDetailComponent implements OnInit {
   }
 
   /**
-   * Formats a TimeSpan value.
-   *
-   * Supports:
-   *
-   * - HH:mm:ss
-   * - d.HH:mm:ss
-   * - HH:mm
-   *
-   * @param value TimeSpan string.
-   * @returns Compact duration.
-   */
+  
+  * Formats a TimeSpan value.
+  *
+  * Supports:
+  *
+  * * HH:mm:ss
+  * * d.HH:mm:ss
+  * * HH:mm
+  *
+  * @param value TimeSpan string.
+  * @returns Compact duration.
+    */
   formatWorkTime(value?: string): string {
     if (!value) {
       return '0m';
@@ -977,12 +1116,13 @@ export class TicketDetailComponent implements OnInit {
       return value;
     }
 
-    let hoursPart = parts[0];
+    const hoursPart = parts[0];
     const minutesPart = parts[1];
 
     let days = 0;
     let hours = 0;
-    let minutes = Number(minutesPart) || 0;
+
+    const minutes = Number(minutesPart) || 0;
 
     if (hoursPart.includes('.')) {
       const dayParts = hoursPart.split('.');
@@ -996,63 +1136,38 @@ export class TicketDetailComponent implements OnInit {
     const result: string[] = [];
 
     if (days > 0) {
-      result.push(`${days}d`);
+      result.push(`${days} d`);
     }
 
     if (hours > 0) {
-      result.push(`${hours}h`);
+      result.push(`${hours} h`);
     }
 
     if (minutes > 0) {
-      result.push(`${minutes}m`);
+      result.push(`${minutes} m`);
     }
 
     return result.length > 0 ? result.join(' ') : '0m';
   }
 
   /**
-   * Gets the comments supplied by the details endpoint.
-   *
-   * @returns Ticket comments.
-   */
-  get comments(): TicketCommentResponse[] {
-    return this.ticketDetails?.comments ?? [];
-  }
-
-  /**
-   * Gets the activity entries supplied by the details endpoint.
-   *
-   * @returns Ticket activities.
-   */
-  get activities(): TicketActivityResponse[] {
-    return this.ticketDetails?.activities ?? [];
-  }
-
-  /**
-   * Gets the recorded time entries.
-   *
-   * @returns Ticket time entries.
-   */
-  get timeEntries(): TicketTimeEntryResponse[] {
-    return this.ticketDetails?.timeEntries ?? [];
-  }
-
-  /**
-   * Returns the display name for an agent.
-   *
-   * @param agent Agent.
-   * @returns Agent name.
-   */
+  
+  * Returns the display name for an agent.
+  *
+  * @param agent Agent.
+  * @returns Agent name.
+    */
   getAgentName(agent: UserResponse): string {
     return `${agent.firstName} ${agent.lastName}`.trim();
   }
 
   /**
-   * Returns the first letter of an agent's name.
-   *
-   * @param agent Agent.
-   * @returns Agent initial.
-   */
+  
+  * Returns the first letter of an agent's name.
+  *
+  * @param agent Agent.
+  * @returns Agent initial.
+    */
   getAgentInitial(agent: UserResponse): string {
     return this.getAgentName(agent).charAt(0).toUpperCase();
   }

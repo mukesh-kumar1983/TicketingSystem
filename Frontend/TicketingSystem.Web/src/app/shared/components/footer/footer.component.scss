@@ -1,0 +1,166 @@
+/**
+
+* ============================================================================
+* TicketingSystem - Application Footer
+* ============================================================================
+*
+* Shared footer styling used by:
+*
+* * Login page.
+* * Main authenticated application layout.
+*
+* The footer is intentionally simple, professional, and readable. It uses
+* moderate text contrast and spacing so that the copyright and application
+* name remain visible without competing with the primary page content.
+*
+* ============================================================================
+  */
+
+/* ============================================================================
+
+* FOOTER
+* ============================================================================
+  */
+
+.application-footer {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 58px;
+  padding: 15px 30px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  gap: 8px;
+}
+
+/* ============================================================================
+
+* COPYRIGHT
+* ============================================================================
+  */
+
+.copyright-text {
+  color: #475467;
+  font-weight: 500;
+}
+
+/* ============================================================================
+
+* RIGHTS
+* ============================================================================
+  */
+
+.rights-text {
+  color: #667085;
+}
+
+/* ============================================================================
+
+* APPLICATION NAME
+* ============================================================================
+  */
+
+.application-name {
+  color: #475467;
+  font-weight: 500;
+}
+
+/* ============================================================================
+
+* SEPARATOR
+* ============================================================================
+  */
+
+.footer-separator {
+  color: #98a2b3;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* ============================================================================
+
+* PREVENT UNDESIRED TEXT BREAKING
+* ============================================================================
+*
+* Each logical footer item remains together when sufficient horizontal
+* space is available.
+* ============================================================================
+  */
+
+.copyright-text,
+.rights-text,
+.application-name {
+  white-space: nowrap;
+}
+
+/* ============================================================================
+
+* MOBILE
+* ============================================================================
+*
+* The footer remains readable on smaller screens while reducing horizontal
+* padding to provide more usable width.
+* ============================================================================
+  */
+
+@media (max-width: 700px) {
+  .application-footer {
+    min-height: 54px;
+    padding: 13px 18px;
+    font-size: 12px;
+    gap: 7px;
+  }
+
+  .footer-separator {
+    font-size: 12px;
+  }
+}
+
+/* ============================================================================
+
+* SMALL MOBILE
+* ============================================================================
+*
+* On narrow devices, allow the footer to wrap naturally while maintaining
+* readable text and comfortable spacing.
+* ============================================================================
+  */
+
+@media (max-width: 420px) {
+  .application-footer {
+    min-height: 52px;
+    padding: 12px 12px;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .footer-separator {
+    font-size: 11px;
+  }
+}
+
+/* ============================================================================
+
+* REDUCED MOTION
+* ============================================================================
+*
+* The footer does not currently contain animated elements. This section is
+* intentionally retained as documentation for the application's
+* accessibility strategy.
+* ============================================================================
+  */
+
+@media (prefers-reduced-motion: reduce) {
+  .application-footer {
+    transition: none;
+  }
+}

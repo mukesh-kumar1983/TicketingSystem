@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
 using TicketingSystem.Infrastructure.Identity;
 using TicketingSystem.Infrastructure.Persistence;
 
@@ -12,6 +15,11 @@ namespace TicketingSystem.Infrastructure.Seeding;
 /// The seeder is designed to be idempotent, which means it can safely run
 /// every time the application starts without attempting to recreate existing
 /// roles or users.
+///
+/// In the normal application environment, pending Entity Framework Core
+/// migrations are applied. During integration testing, the SQLite in-memory
+/// database is initialized directly because the test database is temporary
+/// and does not require SQL Server migrations.
 /// </summary>
 public static class IdentitySeeder
 {
@@ -31,9 +39,14 @@ public static class IdentitySeeder
     private const string CustomerRole = "Customer";
 
     /// <summary>
+    /// Name of the ASP.NET Core environment used by integration tests.
+    /// </summary>
+    private const string TestingEnvironment = "Testing";
+
+    /// <summary>
     /// Seeds application roles and test users into the database.
     ///
-    /// The database is migrated before the Identity data is seeded.
+    /// The database is initialized before Identity data is seeded.
     /// Existing roles and users are reused rather than recreated.
     /// </summary>
     /// <param name="serviceProvider">
@@ -47,27 +60,68 @@ public static class IdentitySeeder
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
-        var context = serviceProvider
-            .GetRequiredService<TicketingSystemDbContext>();
+        var context =
+            serviceProvider.GetRequiredService<
+                TicketingSystemDbContext>();
 
-        var roleManager = serviceProvider
-            .GetRequiredService<RoleManager<IdentityRole>>();
+        var roleManager =
+            serviceProvider.GetRequiredService<
+                RoleManager<IdentityRole>>();
 
-        var userManager = serviceProvider
-            .GetRequiredService<UserManager<ApplicationUser>>();
+        var userManager =
+            serviceProvider.GetRequiredService<
+                UserManager<ApplicationUser>>();
+
+        var environment =
+            serviceProvider.GetRequiredService<
+                IWebHostEnvironment>();
+
+        // =====================================================================
+        // DATABASE INITIALIZATION
+        // =====================================================================
 
         /*
-         * Apply any pending Entity Framework Core migrations before attempting
-         * to access or create Identity records.
+         * Integration tests use an in-memory SQLite database.
+         *
+         * SQLite in-memory databases are intentionally temporary and are not
+         * backed by the application's SQL Server migration history.
+         *
+         * EnsureCreatedAsync creates the complete EF Core model directly and
+         * is therefore appropriate for the isolated test database.
+         *
+         * All normal application environments continue to use migrations.
          */
-        await context.Database.MigrateAsync();
+        if (environment.EnvironmentName == TestingEnvironment)
+        {
+            await context.Database.EnsureCreatedAsync();
+        }
+        else
+        {
+            await context.Database.MigrateAsync();
+        }
+
+        // =====================================================================
+        // ROLES
+        // =====================================================================
 
         /*
          * Create the application roles when they do not already exist.
          */
-        await SeedRoleAsync(roleManager, AdminRole);
-        await SeedRoleAsync(roleManager, SupportAgentRole);
-        await SeedRoleAsync(roleManager, CustomerRole);
+        await SeedRoleAsync(
+            roleManager,
+            AdminRole);
+
+        await SeedRoleAsync(
+            roleManager,
+            SupportAgentRole);
+
+        await SeedRoleAsync(
+            roleManager,
+            CustomerRole);
+
+        // =====================================================================
+        // DEFAULT ADMINISTRATOR
+        // =====================================================================
 
         /*
          * Create or reuse the default administrator account.
@@ -80,6 +134,10 @@ public static class IdentitySeeder
             "Admin123!",
             AdminRole);
 
+        // =====================================================================
+        // DEFAULT SUPPORT AGENT
+        // =====================================================================
+
         /*
          * Create or reuse the default support-agent account.
          */
@@ -90,6 +148,10 @@ public static class IdentitySeeder
             "Agent",
             "Agent123!",
             SupportAgentRole);
+
+        // =====================================================================
+        // DEFAULT CUSTOMER
+        // =====================================================================
 
         /*
          * Create or reuse the default customer account.
@@ -130,8 +192,9 @@ public static class IdentitySeeder
         /*
          * Create the missing role.
          */
-        var result = await roleManager.CreateAsync(
-            new IdentityRole(roleName));
+        var result =
+            await roleManager.CreateAsync(
+                new IdentityRole(roleName));
 
         /*
          * Identity may return multiple validation errors, so include all of
@@ -141,7 +204,10 @@ public static class IdentitySeeder
         {
             throw new InvalidOperationException(
                 $"Unable to create role '{roleName}': " +
-                $"{string.Join(", ", result.Errors.Select(error => error.Description))}");
+                $"{string.Join(
+                    ", ",
+                    result.Errors.Select(
+                        error => error.Description))}");
         }
     }
 
@@ -188,7 +254,8 @@ public static class IdentitySeeder
          * This is the normal lookup for an Identity user whose email matches
          * the configured seed account.
          */
-        var existingUser = await userManager.FindByEmailAsync(email);
+        var existingUser =
+            await userManager.FindByEmailAsync(email);
 
         /*
          * If the email lookup did not find the user, search by username too.
@@ -197,7 +264,8 @@ public static class IdentitySeeder
          * unique Identity constraint. Without this second lookup, the seeder
          * could attempt to create a user whose username already exists.
          */
-        existingUser ??= await userManager.FindByNameAsync(email);
+        existingUser ??=
+            await userManager.FindByNameAsync(email);
 
         /*
          * If the user already exists, do not attempt to create another user.
@@ -214,25 +282,31 @@ public static class IdentitySeeder
             return;
         }
 
+        // =====================================================================
+        // CREATE USER
+        // =====================================================================
+
         /*
          * No matching user exists, so create the initial Identity account.
          */
-        var user = new ApplicationUser
-        {
-            UserName = email,
-            Email = email,
-            EmailConfirmed = true,
-            FirstName = firstName,
-            LastName = lastName
-        };
+        var user =
+            new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                FirstName = firstName,
+                LastName = lastName
+            };
 
         /*
          * Create the Identity user using the configured password hasher and
          * Identity validation pipeline.
          */
-        var createResult = await userManager.CreateAsync(
-            user,
-            password);
+        var createResult =
+            await userManager.CreateAsync(
+                user,
+                password);
 
         /*
          * Stop application startup when user creation fails.
@@ -244,7 +318,10 @@ public static class IdentitySeeder
         {
             throw new InvalidOperationException(
                 $"Unable to create user '{email}': " +
-                $"{string.Join(", ", createResult.Errors.Select(error => error.Description))}");
+                $"{string.Join(
+                    ", ",
+                    createResult.Errors.Select(
+                        error => error.Description))}");
         }
 
         /*
@@ -282,7 +359,9 @@ public static class IdentitySeeder
          *
          * This makes repeated application startups safe.
          */
-        if (await userManager.IsInRoleAsync(user, roleName))
+        if (await userManager.IsInRoleAsync(
+            user,
+            roleName))
         {
             return;
         }
@@ -290,9 +369,10 @@ public static class IdentitySeeder
         /*
          * The user exists but does not have the required role, so assign it.
          */
-        var roleResult = await userManager.AddToRoleAsync(
-            user,
-            roleName);
+        var roleResult =
+            await userManager.AddToRoleAsync(
+                user,
+                roleName);
 
         /*
          * Fail clearly if Identity could not assign the required role.
@@ -302,7 +382,11 @@ public static class IdentitySeeder
             throw new InvalidOperationException(
                 $"Unable to assign role '{roleName}' to " +
                 $"'{user.Email ?? user.UserName}': " +
-                $"{string.Join(", ", roleResult.Errors.Select(error => error.Description))}");
+                $"{string.Join(
+                    ", ",
+                    roleResult.Errors.Select(
+                        error => error.Description))}");
         }
     }
 }
+

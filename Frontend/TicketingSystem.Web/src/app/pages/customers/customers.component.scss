@@ -1,733 +1,500 @@
 /**
- * ============================================================================
- * TicketingSystem - Customers Page Styles
- * ============================================================================
- *
- * Provides the visual styling for the Customer Management page.
- *
- * Design goals:
- *
- * - Clean enterprise administration interface.
- * - Consistent spacing and typography.
- * - Subtle borders and shadows.
- * - Clear visual hierarchy.
- * - Professional table presentation.
- * - Responsive behavior for smaller screens.
- * ============================================================================
- */
 
-/* ============================================================================
-   Page Container
-   ========================================================================== */
+* ================================================================
+* TicketingSystem - Main Layout
+* ================================================================
+  */
 
-.customers-page {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-  box-sizing: border-box;
-}
-
-/* ============================================================================
-   Page Header
-   ========================================================================== */
-
-.page-header {
+.application-shell {
+  min-height: 100vh;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.5rem;
-  margin-bottom: 1.75rem;
+  background: #f7f8fa;
+  color: #172033;
 }
 
-.eyebrow {
-  margin-bottom: 0.4rem;
-  color: #64748b;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
+/**
 
-.page-header h1 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 1.8rem;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-}
+* ================================================================
+* SIDEBAR
+* ================================================================
+  */
 
-.page-header p {
-  max-width: 650px;
-  margin: 0.5rem 0 0;
-  color: #64748b;
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-/* ============================================================================
-   Buttons
-   ========================================================================== */
-
-.primary-button,
-.secondary-button,
-.refresh-button,
-.action-button,
-.close-button {
-  font-family: inherit;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease,
-    opacity 0.2s ease;
-}
-
-.primary-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 2.5rem;
-  padding: 0.625rem 1rem;
-  border: 1px solid #2563eb;
-  border-radius: 0.5rem;
-  background: #2563eb;
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 100;
+  display: flex;
+  width: 250px;
+  flex-direction: column;
+  background: #111827;
   color: #ffffff;
-  font-size: 0.875rem;
-  font-weight: 600;
-  white-space: nowrap;
+  transition: transform 0.25s ease;
 }
 
-.primary-button:hover:not(:disabled) {
-  border-color: #1d4ed8;
-  background: #1d4ed8;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
-  transform: translateY(-1px);
-}
+/**
 
-.primary-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.primary-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.button-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.05rem;
-  font-weight: 500;
-  line-height: 1;
-}
-
-/* ============================================================================
-   Messages
-   ========================================================================== */
-
-.message {
+* Application branding.
+  */
+.brand {
   display: flex;
   align-items: center;
-  min-height: 2.75rem;
-  margin-bottom: 1.25rem;
-  padding: 0.75rem 1rem;
-  box-sizing: border-box;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1.4;
+  gap: 12px;
+  height: 78px;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.success-message {
-  border: 1px solid #bbf7d0;
-  background: #f0fdf4;
-  color: #166534;
-}
+/**
 
-.error-message {
-  border: 1px solid #fecaca;
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-/* ============================================================================
-   Create / Edit Form Card
-   ========================================================================== */
-
-.form-card {
-  margin-bottom: 1.75rem;
-  padding: 1.5rem;
-  box-sizing: border-box;
-  border: 1px solid #dbeafe;
-  border-radius: 0.75rem;
-  background: #ffffff;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 6px 18px rgba(15, 23, 42, 0.05);
-  scroll-margin-top: 1.5rem;
-}
-
-.form-header {
+* Branding icon.
+  */
+.brand-icon {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.form-header h2 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1.4;
-}
-
-.form-header p {
-  margin: 0.35rem 0 0;
-  color: #64748b;
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.close-button {
-  display: inline-flex;
+  width: 38px;
+  height: 38px;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 0.4rem;
-  background: transparent;
-  color: #64748b;
-  font-size: 1.4rem;
-  line-height: 1;
+  border-radius: 10px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
-.close-button:hover:not(:disabled) {
-  border-color: #e2e8f0;
-  background: #f8fafc;
-  color: #0f172a;
-}
+/**
 
-.close-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* ============================================================================
-   Form Layout
-   ========================================================================== */
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
-}
-
-.form-field {
+* Branding text container.
+  */
+.brand-text {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
 }
 
-.form-field label {
-  color: #334155;
-  font-size: 0.825rem;
-  font-weight: 600;
+/**
+
+* Application name.
+  */
+.brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
-.form-field input {
-  width: 100%;
-  min-height: 2.7rem;
-  padding: 0.625rem 0.75rem;
-  box-sizing: border-box;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.5rem;
-  outline: none;
-  background: #ffffff;
-  color: #0f172a;
-  font-family: inherit;
-  font-size: 0.875rem;
-  line-height: 1.4;
+/**
+
+* Application subtitle.
+  */
+.brand-subtitle {
+  margin-top: 2px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/**
+
+* ================================================================
+* NAVIGATION
+* ================================================================
+  */
+
+.navigation {
+  flex: 1;
+  padding: 28px 14px;
+  overflow-y: auto;
+}
+
+.navigation-section {
+  margin-bottom: 30px;
+}
+
+.navigation-title {
+  display: block;
+  padding: 0 12px 10px;
+  color: #6b7280;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.navigation-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  margin-bottom: 4px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
-.form-field input::placeholder {
-  color: #94a3b8;
+.navigation-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
 }
 
-.form-field input:hover:not(:focus) {
-  border-color: #94a3b8;
+.navigation-item.active {
+  background: #312e81;
+  color: #ffffff;
 }
 
-.form-field input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.field-hint {
-  color: #94a3b8;
-  font-size: 0.75rem;
-  line-height: 1.4;
-}
-
-/* ============================================================================
-   Form Error
-   ========================================================================== */
-
-.form-message {
-  margin-bottom: 1.25rem;
-  padding: 0.75rem 0.875rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.form-error-message {
-  border: 1px solid #fecaca;
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-/* ============================================================================
-   Form Actions
-   ========================================================================== */
-
-.form-actions {
+.navigation-icon {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.secondary-button {
-  display: inline-flex;
+  width: 20px;
   align-items: center;
   justify-content: center;
-  min-height: 2.5rem;
-  padding: 0.625rem 1rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.5rem;
-  background: #ffffff;
-  color: #334155;
-  font-size: 0.875rem;
+  color: currentColor;
+  font-size: 17px;
+}
+
+/**
+
+* ================================================================
+* SIDEBAR FOOTER
+* ================================================================
+  */
+
+.sidebar-footer {
+  padding: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.environment-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+.environment-indicator > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.environment-title {
+  color: #e5e7eb;
+  font-size: 12px;
   font-weight: 600;
 }
 
-.secondary-button:hover:not(:disabled) {
-  border-color: #94a3b8;
-  background: #f8fafc;
+.environment-subtitle {
+  margin-top: 2px;
+  color: #6b7280;
+  font-size: 10px;
 }
 
-.secondary-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
+/**
 
-/* ============================================================================
-   Customer Table Card
-   ========================================================================== */
+* ================================================================
+* MAIN AREA
+* ================================================================
+  */
 
-.table-card {
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  background: #ffffff;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.03),
-    0 4px 14px rgba(15, 23, 42, 0.035);
-}
-
-/* ============================================================================
-   Table Header
-   ========================================================================== */
-
-.table-header {
+.main-area {
+  min-width: 0;
+  width: calc(100% - 250px);
+  min-height: 100vh;
+  margin-left: 250px;
   display: flex;
+  flex-direction: column;
+}
+
+/**
+
+* ================================================================
+* TOPBAR
+* ================================================================
+  */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  min-height: 78px;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 0 30px;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid #e5e7eb;
+  backdrop-filter: blur(10px);
 }
 
-.table-header h2 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.table-header p {
-  margin: 0.3rem 0 0;
-  color: #94a3b8;
-  font-size: 0.775rem;
-}
-
-/* ============================================================================
-   Refresh Button
-   ========================================================================== */
-
-.refresh-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.25rem;
-  padding: 0.5rem 0.875rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.45rem;
-  background: #ffffff;
-  color: #475569;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.refresh-button:hover:not(:disabled) {
-  border-color: #94a3b8;
-  background: #f8fafc;
-  color: #1e293b;
-}
-
-.refresh-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* ============================================================================
-   Table
-   ========================================================================== */
-
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  min-width: 720px;
-  border-collapse: collapse;
-}
-
-thead {
-  background: #f8fafc;
-}
-
-th {
-  padding: 0.8rem 1.25rem;
-  border-bottom: 1px solid #e2e8f0;
-  color: #64748b;
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-align: left;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-
-td {
-  padding: 1rem 1.25rem;
-  border-top: 1px solid #f1f5f9;
-  color: #475569;
-  font-size: 0.85rem;
-  vertical-align: middle;
-}
-
-tbody tr {
-  transition: background-color 0.15s ease;
-}
-
-tbody tr:hover {
-  background: #f8fafc;
-}
-
-/* ============================================================================
-   Customer Cell
-   ========================================================================== */
-
-.customer-cell {
+.topbar-title {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 2.35rem;
-  height: 2.35rem;
-  border: 1px solid #dbeafe;
-  border-radius: 50%;
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.customer-name {
-  color: #1e293b;
-  font-size: 0.85rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.customer-id {
-  max-width: 260px;
-  margin-top: 0.2rem;
-  overflow: hidden;
-  color: #94a3b8;
-  font-size: 0.68rem;
-  line-height: 1.3;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* ============================================================================
-   Email
-   ========================================================================== */
-
-.email {
-  color: #475569;
-  font-size: 0.85rem;
-}
-
-/* ============================================================================
-   Role Badge
-   ========================================================================== */
-
-.role-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.7rem;
-  padding: 0.3rem 0.625rem;
-  box-sizing: border-box;
-  border: 1px solid #dbeafe;
-  border-radius: 999px;
-  background: #eff6ff;
-  color: #1d4ed8;
-  font-size: 0.7rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* ============================================================================
-   Actions
-   ========================================================================== */
-
-.actions-column {
-  width: 180px;
-  text-align: right;
-}
-
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.action-button {
-  min-height: 2.15rem;
-  padding: 0.4rem 0.7rem;
-  border: 1px solid transparent;
-  border-radius: 0.4rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.edit-button {
-  border-color: #dbeafe;
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.edit-button:hover:not(:disabled) {
-  border-color: #bfdbfe;
-  background: #dbeafe;
-}
-
-.delete-button {
-  border-color: #fecaca;
-  background: #fef2f2;
-  color: #b91c1c;
-}
-
-.delete-button:hover:not(:disabled) {
-  border-color: #fca5a5;
-  background: #fee2e2;
-}
-
-.action-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* ============================================================================
-   Loading / Empty States
-   ========================================================================== */
-
-.state-container {
-  display: flex;
-  min-height: 14rem;
-  align-items: center;
-  justify-content: center;
   flex-direction: column;
-  gap: 0.55rem;
-  padding: 2rem;
-  box-sizing: border-box;
-  color: #64748b;
-  text-align: center;
 }
 
-.state-container p {
-  margin: 0;
-  font-size: 0.85rem;
-  line-height: 1.5;
+.topbar-label {
+  color: #98a2b3;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
 }
 
-.spinner {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-bottom: 0.35rem;
-  border: 3px solid #e2e8f0;
-  border-top-color: #2563eb;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.empty-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  margin-bottom: 0.35rem;
-  border-radius: 50%;
-  background: #f8fafc;
-  font-size: 1.5rem;
-}
-
-.empty-state h3 {
-  margin: 0;
-  color: #1e293b;
-  font-size: 1rem;
+.topbar-name {
+  margin-top: 3px;
+  color: #101828;
+  font-size: 15px;
   font-weight: 700;
 }
 
-.empty-state p {
-  max-width: 360px;
-  margin: 0 0 1rem;
-  color: #64748b;
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
-/* ============================================================================
-   Responsive Design
-   ========================================================================== */
+/**
+
+* Notification button.
+  */
+.icon-button {
+  position: relative;
+  display: flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475467;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: #f9fafb;
+}
+
+.notification-icon {
+  font-size: 19px;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: flex;
+  width: 17px;
+  height: 17px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/**
+
+* User profile.
+  */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.user-avatar {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.user-role {
+  margin-top: 2px;
+  color: #98a2b3;
+  font-size: 10px;
+}
+
+/**
+
+* Logout button.
+  */
+.logout-button {
+  padding: 9px 14px;
+  border: 1px solid #e4e7ec;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: #f9fafb;
+  color: #101828;
+}
+
+/**
+
+* ================================================================
+* PAGE CONTENT
+* ================================================================
+*
+* The page content expands to consume available vertical space.
+*
+* This allows the shared application footer to naturally remain at
+* the bottom of the application viewport when page content is short.
+  */
+
+.page-content {
+  flex: 1 0 auto;
+  min-height: calc(100vh - 78px);
+  padding: 30px;
+}
+
+/**
+
+* ================================================================
+* MOBILE MENU
+* ================================================================
+  */
+
+.mobile-menu-button {
+  display: none;
+  width: 38px;
+  height: 38px;
+  padding: 8px;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.mobile-menu-button span {
+  display: block;
+  height: 2px;
+  margin: 4px 0;
+  background: #344054;
+}
+
+/**
+
+* Overlay displayed behind the mobile sidebar.
+  */
+.sidebar-overlay {
+  display: none;
+}
+
+/**
+
+* ================================================================
+* RESPONSIVE DESIGN
+* ================================================================
+  */
 
 @media (max-width: 900px) {
-  .customers-page {
-    padding: 1.5rem;
+  .sidebar {
+    transform: translateX(-100%);
   }
 
-  .page-header {
-    align-items: flex-start;
-    flex-direction: column;
+  .sidebar.sidebar-open {
+    transform: translateX(0);
   }
 
-  .page-header .primary-button {
-    align-self: flex-start;
+  .main-area {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .mobile-menu-button {
+    display: block;
+  }
+
+  .topbar {
+    gap: 16px;
+    padding: 0 20px;
+  }
+
+  .topbar-title {
+    flex: 1;
+  }
+
+  .user-details {
+    display: none;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: block;
+    background: rgba(15, 23, 42, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .sidebar-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .page-content {
+    padding: 24px 20px;
   }
 }
 
-@media (max-width: 768px) {
-  .customers-page {
-    padding: 1rem;
+@media (max-width: 600px) {
+  .topbar {
+    min-height: 68px;
+    padding: 0 14px;
   }
 
-  .page-header h1 {
-    font-size: 1.5rem;
+  .topbar-name {
+    font-size: 14px;
   }
 
-  .form-card {
-    padding: 1.25rem;
+  .topbar-actions {
+    gap: 8px;
   }
 
-  .form-grid {
-    grid-template-columns: 1fr;
+  .logout-button {
+    display: none;
   }
 
-  .table-header {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 1rem 1.25rem;
-  }
-
-  .refresh-button {
-    align-self: flex-start;
-  }
-
-  .form-actions {
-    flex-direction: column-reverse;
-  }
-
-  .form-actions button {
-    width: 100%;
-  }
-
-  .actions {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 480px) {
-  .customers-page {
-    padding: 0.75rem;
-  }
-
-  .page-header {
-    margin-bottom: 1.25rem;
-  }
-
-  .page-header .primary-button {
-    width: 100%;
-  }
-
-  .form-card {
-    padding: 1rem;
-  }
-
-  .table-card {
-    border-radius: 0.625rem;
-  }
-
-  .table-header {
-    padding: 1rem;
-  }
-
-  th,
-  td {
-    padding-left: 0.9rem;
-    padding-right: 0.9rem;
+  .page-content {
+    padding: 20px 14px;
   }
 }

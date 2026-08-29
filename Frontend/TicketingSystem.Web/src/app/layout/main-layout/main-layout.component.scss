@@ -195,12 +195,19 @@
  * ================================================================
  * MAIN AREA
  * ================================================================
+ *
+ * The main area is now a vertical flex container so the application
+ * footer naturally stays at the bottom when there is not enough page
+ * content to fill the viewport.
  */
 
 .main-area {
   min-width: 0;
   width: calc(100% - 250px);
+  min-height: 100vh;
   margin-left: 250px;
+  display: flex;
+  flex-direction: column;
 }
 
 /**
@@ -215,6 +222,7 @@
   z-index: 50;
   display: flex;
   min-height: 78px;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   padding: 0 30px;
@@ -352,11 +360,45 @@
  * ================================================================
  * PAGE CONTENT
  * ================================================================
+ *
+ * flex: 1 allows the footer to remain at the bottom of the viewport
+ * when a page has little content.
  */
 
 .page-content {
+  flex: 1 0 auto;
   min-height: calc(100vh - 78px);
   padding: 30px;
+}
+
+/**
+ * ================================================================
+ * APPLICATION FOOTER
+ * ================================================================
+ *
+ * The footer belongs to the main application area rather than the
+ * sidebar so it remains consistent across all authenticated pages.
+ */
+
+.application-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-height: 54px;
+  padding: 14px 30px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #98a2b3;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.footer-separator {
+  color: #d0d5dd;
 }
 
 /**
@@ -446,6 +488,10 @@
   .page-content {
     padding: 24px 20px;
   }
+
+  .application-footer {
+    padding: 14px 20px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -468,5 +514,11 @@
 
   .page-content {
     padding: 20px 14px;
+  }
+
+  .application-footer {
+    min-height: 50px;
+    padding: 12px 14px;
+    font-size: 10px;
   }
 }

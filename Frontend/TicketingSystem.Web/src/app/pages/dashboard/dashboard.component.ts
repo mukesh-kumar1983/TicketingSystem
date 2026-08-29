@@ -1,111 +1,142 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { forkJoin, Observable } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
 import { TicketService } from '../../core/services/ticket.service';
+
 import { CurrentUser } from '../../models/authentication.models';
 import {
   TicketPriority,
   TicketQueryResponse,
   TicketResponse,
   TicketStatus,
-  getTicketPriorityLabel,
-  getTicketStatusLabel,
 } from '../../models/ticket.models';
 
 /**
- * Represents the authenticated user's dashboard.
- *
- * The dashboard displays real information retrieved from the
- * TicketingSystem API.
- *
- * The dashboard currently retrieves:
- *
- * - The authenticated user's information.
- * - Total ticket count.
- * - Open ticket count.
- * - In-progress ticket count.
- * - Resolved ticket count.
- * - Closed ticket count.
- * - The five most recently created tickets.
- *
- * No ticket statistics are hard-coded in this component.
- */
+
+* ============================================================================
+* TicketingSystem - Dashboard Component
+* ============================================================================
+*
+* Displays the authenticated user's dashboard.
+*
+* Responsibilities:
+*
+* * Load the currently authenticated user.
+* * Load ticket statistics.
+* * Load the five most recently created tickets.
+* * Display ticket counts by status.
+* * Display recent ticket information.
+* * Format ticket status labels.
+* * Format ticket priority labels.
+* * Handle authentication failures.
+* * Handle ticket API failures.
+* * Log the user out and navigate to the login page.
+*
+* The component uses the existing AuthService and TicketService abstractions.
+* No direct HTTP calls are performed here.
+*
+* The component is intentionally kept simple and follows the existing
+* TicketingSystem architecture.
+* ============================================================================
+  */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
   /**
-   * Currently authenticated user.
-   */
+
+  * Currently authenticated user.
+  *
+  * Remains null until the current-user API request completes successfully.
+    */
   currentUser: CurrentUser | null = null;
 
   /**
-   * Total number of tickets visible to the authenticated user.
-   */
+  
+  * Total number of tickets available to the authenticated user.
+    */
   totalTickets = 0;
 
   /**
-   * Number of open tickets.
-   */
+  
+  * Number of tickets currently in Open status.
+    */
   openTickets = 0;
 
   /**
-   * Number of tickets currently being worked on.
-   */
+  
+  * Number of tickets currently In Progress.
+    */
   inProgressTickets = 0;
 
   /**
-   * Number of resolved tickets.
-   */
+  
+  * Number of tickets currently Resolved.
+    */
   resolvedTickets = 0;
 
   /**
-   * Number of closed tickets.
-   */
+  
+  * Number of tickets currently Closed.
+    */
   closedTickets = 0;
 
   /**
-   * Most recently created tickets.
-   */
+  
+  * Most recently created tickets.
+  *
+  * The dashboard displays a maximum of five tickets.
+    */
   recentTickets: TicketResponse[] = [];
 
   /**
-   * Indicates whether dashboard data is being loaded.
-   */
+  
+  * Indicates whether the dashboard is currently loading.
+    */
   isLoading = true;
 
   /**
-   * Contains a user-friendly error message when an API request fails.
-   */
+  
+  * User-facing dashboard error message.
+  *
+  * An empty string indicates that no error exists.
+    */
   errorMessage = '';
 
   /**
-   * Exposes the ticket status enum to the template.
-   *
-   * Angular templates cannot directly access imported TypeScript
-   * enums unless they are exposed through the component.
-   */
+  
+  * Exposes the TicketStatus enum to the Angular template.
+  *
+  * This allows the template to compare ticket statuses without hard-coded
+  * numeric enum values.
+    */
   readonly ticketStatus = TicketStatus;
 
   /**
-   * Exposes the ticket priority enum to the template.
-   */
+  
+  * Exposes the TicketPriority enum to the Angular template.
+  *
+  * This allows the template to compare ticket priorities without hard-coded
+  * numeric enum values.
+    */
   readonly ticketPriority = TicketPriority;
 
   /**
-   * Creates an instance of DashboardComponent.
-   *
-   * @param authService Application authentication service.
-   * @param ticketService Application ticket service.
-   * @param router Angular router.
-   */
+  
+  * Creates an instance of DashboardComponent.
+  *
+  * @param authService Authentication service used to retrieve the current
+  * authenticated user and perform logout.
+  * @param ticketService Ticket service used to retrieve dashboard ticket data.
+  * @param router Angular router used to navigate to the login page.
+    */
   constructor(
     private readonly authService: AuthService,
     private readonly ticketService: TicketService,
@@ -113,158 +144,119 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   /**
-   * Initializes the dashboard.
-   */
+  
+  * Initializes the dashboard.
+  *
+  * The authenticated user must be loaded successfully before ticket
+  * information is requested.
+    */
   ngOnInit(): void {
-    this.loadDashboard();
+    this.loadCurrentUser();
   }
 
   /**
-   * Loads all dashboard information.
-   *
-   * The authenticated user is loaded first because the dashboard
-   * should only display information after authentication has been
-   * successfully established.
-   */
-  private loadDashboard(): void {
+  
+  * Loads the currently authenticated user.
+  *
+  * Ticket information is requested only after the current-user request
+  * succeeds. This prevents unnecessary ticket API calls when authentication
+  * is no longer valid.
+    */
+  private loadCurrentUser(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
     this.authService.getCurrentUser().subscribe({
-      /**
-       * Authentication information was retrieved successfully.
-       */
-      next: (user) => {
+      next: (user: CurrentUser) => {
         this.currentUser = user;
-
-        this.loadTicketStatistics();
+        this.loadTicketData();
       },
 
-      /**
-       * Authentication request failed.
-       */
-      error: (error) => {
-        this.isLoading = false;
-
-        /**
-         * A 401 means that the stored JWT is no longer valid.
-         */
-        if (error.status === 401) {
-          this.authService.logout();
-
-          this.router.navigate(['/login']);
-
-          return;
-        }
-
-        this.errorMessage = 'Unable to retrieve your account information.';
+      error: (error: unknown) => {
+        this.handleAuthenticationError(error);
       },
     });
   }
 
   /**
-   * Loads ticket statistics and recent tickets from the API.
-   *
-   * The existing Tickets API supports status filtering and returns
-   * TotalCount for the complete filtered result set.
-   *
-   * Therefore we can calculate accurate dashboard statistics without
-   * introducing a new dashboard-specific backend endpoint.
-   */
-  private loadTicketStatistics(): void {
-    forkJoin({
-      /**
-       * Retrieves the total number of tickets.
-       */
+  
+  * Loads all dashboard ticket information.
+  *
+  * Six requests are performed:
+  *
+  * 1. Total tickets.
+  * 2. Open tickets.
+  * 3. In-progress tickets.
+  * 4. Resolved tickets.
+  * 5. Closed tickets.
+  * 6. Five most recently created tickets.
+  *
+  * forkJoin waits until all requests complete successfully. If any request
+  * fails, the combined observable enters its error handler.
+    */
+  private loadTicketData(): void {
+    const requests = {
       total: this.ticketService.getTickets({
         pageNumber: 1,
         pageSize: 1,
       }),
 
-      /**
-       * Retrieves the total number of open tickets.
-       */
       open: this.ticketService.getTickets({
         pageNumber: 1,
         pageSize: 1,
         status: TicketStatus.Open,
       }),
 
-      /**
-       * Retrieves the total number of in-progress tickets.
-       */
       inProgress: this.ticketService.getTickets({
         pageNumber: 1,
         pageSize: 1,
         status: TicketStatus.InProgress,
       }),
 
-      /**
-       * Retrieves the total number of resolved tickets.
-       */
       resolved: this.ticketService.getTickets({
         pageNumber: 1,
         pageSize: 1,
         status: TicketStatus.Resolved,
       }),
 
-      /**
-       * Retrieves the total number of closed tickets.
-       */
       closed: this.ticketService.getTickets({
         pageNumber: 1,
         pageSize: 1,
         status: TicketStatus.Closed,
       }),
 
-      /**
-       * Retrieves the five most recently created tickets.
-       */
       recent: this.ticketService.getTickets({
         pageNumber: 1,
         pageSize: 5,
         sortBy: 'CreatedAt',
         sortDescending: true,
       }),
-    }).subscribe({
-      /**
-       * All ticket requests completed successfully.
-       */
+    };
+
+    forkJoin(requests).subscribe({
       next: (responses) => {
-        this.applyTicketStatistics(responses);
+        this.applyTicketResponses(responses);
 
         this.isLoading = false;
       },
 
-      /**
-       * At least one ticket request failed.
-       */
-      error: (error) => {
-        this.isLoading = false;
-
-        /**
-         * If the API rejects the JWT, return to the login page.
-         */
-        if (error.status === 401) {
-          this.authService.logout();
-
-          this.router.navigate(['/login']);
-
-          return;
-        }
-
-        this.errorMessage =
-          'Unable to retrieve ticket information from the server.';
+      error: (error: unknown) => {
+        this.handleTicketError(error);
       },
     });
   }
 
   /**
-   * Applies the API responses to the dashboard properties.
-   *
-   * @param responses Responses returned by the ticket API.
-   */
-  private applyTicketStatistics(responses: {
+  
+  * Applies the ticket API responses to the dashboard state.
+  *
+  * TotalCount is intentionally used for ticket statistics rather than the
+  * number of records returned in the Items collection. Statistics requests
+  * use PageSize = 1, so Items normally contains at most one record.
+  *
+  * @param responses Ticket responses returned by the six dashboard queries.
+    */
+  private applyTicketResponses(responses: {
     total: TicketQueryResponse;
     open: TicketQueryResponse;
     inProgress: TicketQueryResponse;
@@ -272,49 +264,152 @@ export class DashboardComponent implements OnInit {
     closed: TicketQueryResponse;
     recent: TicketQueryResponse;
   }): void {
-    /**
-     * TotalCount represents the complete result set, not just the
-     * records returned on the current page.
-     */
     this.totalTickets = responses.total.totalCount;
-
     this.openTickets = responses.open.totalCount;
-
     this.inProgressTickets = responses.inProgress.totalCount;
-
     this.resolvedTickets = responses.resolved.totalCount;
-
     this.closedTickets = responses.closed.totalCount;
 
-    this.recentTickets = responses.recent.items;
+    this.recentTickets = responses.recent.items ?? [];
   }
 
   /**
-   * Returns a user-friendly status label.
-   *
-   * @param status Numeric ticket status.
-   * @returns Human-readable status.
-   */
+  
+  * Handles an error returned while retrieving the current authenticated user.
+  *
+  * A 401 response means that the authentication session is no longer valid.
+  * In that case the user is logged out and redirected to the login page.
+  *
+  * Other errors are presented as a dashboard error without logging the user
+  * out.
+  *
+  * @param error Error returned by the authentication API.
+    */
+  private handleAuthenticationError(error: unknown): void {
+    this.isLoading = false;
+
+    if (this.getHttpStatus(error) === 401) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+
+      this.errorMessage = '';
+
+      return;
+    }
+
+    this.errorMessage = 'Unable to retrieve your account information.';
+  }
+
+  /**
+  
+  * Handles an error returned while retrieving ticket information.
+  *
+  * A 401 response means that the authentication session is no longer valid.
+  * In that case the user is logged out and redirected to the login page.
+  *
+  * Other errors are presented to the user while keeping the current
+  * authentication state intact.
+  *
+  * @param error Error returned by the ticket API.
+    */
+  private handleTicketError(error: unknown): void {
+    this.isLoading = false;
+
+    if (this.getHttpStatus(error) === 401) {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+
+      this.errorMessage = '';
+
+      return;
+    }
+
+    this.errorMessage =
+      'Unable to retrieve ticket information from the server.';
+  }
+
+  /**
+  
+  * Extracts an HTTP status code from an unknown error value.
+  *
+  * Angular HTTP errors normally expose a numeric `status` property. The
+  * defensive implementation keeps the component safe when tests or other
+  * callers provide a different error shape.
+  *
+  * @param error Unknown error value.
+  * @returns HTTP status code when available; otherwise zero.
+    */
+  private getHttpStatus(error: unknown): number {
+    if (typeof error === 'object' && error !== null && 'status' in error) {
+      const status = (error as { status?: unknown }).status;
+
+      return typeof status === 'number' ? status : 0;
+    }
+
+    return 0;
+  }
+
+  /**
+  
+  * Returns the display label for a ticket status.
+  *
+  * @param status Ticket workflow status.
+  * @returns Human-readable status label.
+    */
   getStatusLabel(status: TicketStatus): string {
-    return getTicketStatusLabel(status);
+    switch (status) {
+      case TicketStatus.Open:
+        return 'Open';
+
+      case TicketStatus.InProgress:
+        return 'In Progress';
+
+      case TicketStatus.Resolved:
+        return 'Resolved';
+
+      case TicketStatus.Closed:
+        return 'Closed';
+
+      default:
+        return 'Unknown';
+    }
   }
 
   /**
-   * Returns a user-friendly priority label.
-   *
-   * @param priority Numeric ticket priority.
-   * @returns Human-readable priority.
-   */
+  
+  * Returns the display label for a ticket priority.
+  *
+  * @param priority Ticket priority.
+  * @returns Human-readable priority label.
+    */
   getPriorityLabel(priority: TicketPriority): string {
-    return getTicketPriorityLabel(priority);
+    switch (priority) {
+      case TicketPriority.Low:
+        return 'Low';
+
+      case TicketPriority.Medium:
+        return 'Medium';
+
+      case TicketPriority.High:
+        return 'High';
+
+      case TicketPriority.Critical:
+        return 'Critical';
+
+      default:
+        return 'Unknown';
+    }
   }
 
   /**
-   * Logs the authenticated user out of the application.
-   */
+  
+  * Logs out the currently authenticated user and navigates to the login page.
+  *
+  * The authentication service remains responsible for clearing the
+  * authentication token and other authentication state.
+    */
   logout(): void {
     this.authService.logout();
-
     this.router.navigate(['/login']);
   }
 }
